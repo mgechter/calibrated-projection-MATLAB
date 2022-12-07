@@ -26,7 +26,7 @@ clear
 clc
 
 %% Key Parameters:
-method      = 'KMS';    % Method - either AS or KMS
+method      = 'AS';    % Method - either AS or KMS
 DGP         = 8;        % DGP = 1,2,3,4,5,6,7,8.  DGP = 5,6,7 are Games examples.  
                         % DGP=8 is the BCS example.  If DGP = 8 and BCS = 1,
                         % then also calls computation for BCS confidence interval 
