@@ -457,8 +457,8 @@ for iter=1:EAM_maxit
     end
     change_EI_proj = abs(opt_EI_proj  - opt_val);
     change_proj =abs(opt_val - opt_val_old);
-    feas_points = sum(maxviol_Astep <= CVtol);
-    Output = [iter, opt_val, change_EI_proj, change_proj,maxviol_hash,feas_points,multistart_num , percent_conv,contraction_counter];
+    feas_points = sum(maxviol_Astep <= CVtol)
+    Output = [iter, opt_val, change_EI_proj, change_proj,maxviol_hash,feas_points, multistart_num, percent_conv, contraction_counter];
     fprintf('%9.4f     |   %9.4f      | %9.4e               | %9.4f      | %9.4f    | %9.4f          | %9.4f          | %9.4f           | %9.4f            \n',Output)
 
     % Check for convergence

@@ -1,4 +1,4 @@
-function [m_eq, m_ineq, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_supp, n_supp, d, compute_stdev)
+function [m_eq, m_ineq, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_supp, n_supp, d, p_a, p_e, rho_l, compute_stdev)
 % Compute values and standard deviations of the moments
 
     % setup

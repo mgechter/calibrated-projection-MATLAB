@@ -1,6 +1,8 @@
 clear
 
-rng(47);
+seed = 47;
+
+rng(seed);
 
 
 
@@ -64,40 +66,41 @@ lambda = [0     1     1     1;
              0     0     0     0];
          
          
-theta_0 = [beta; vec(pi); upsilon; vec(gamma); vec(lambda)]
+theta_0 = [beta; vec(pi); upsilon; vec(gamma); vec(lambda)];
 
-u_beta = theta_0(1);
-u_pi = reshape(theta_0((1+1):(1+n_supp^2)), ...
-                n_supp, n_supp)
-pi
-u_upsilon = theta_0((1 + n_supp^2 + 1):(1 + n_supp^2 + n_supp))
-upsilon
-u_gamma = reshape(theta_0((1 + n_supp^2 + n_supp + 1):(1 + n_supp^2 + n_supp + n_supp^2)), ...
-                    n_supp, n_supp)
-gamma
-u_lambda = reshape(theta_0((1 + n_supp^2 + n_supp + n_supp^2 + 1):(1 + n_supp^2 + n_supp + n_supp^2 + n_supp^2)), ...
-                    n_supp, n_supp)
-lambda
+LB_theta = [-3; zeros(n_supp^2, 1); zeros(n_supp, 1); zeros(n_supp^2, 1); zeros(n_supp^2, 1)];
+UB_theta = [3; ones(n_supp^2, 1); ones(n_supp, 1); ones(n_supp^2, 1); ones(n_supp^2, 1)];
 
+% simplex constraints
+A_theta = [ 0, ones(1, n_supp^2), zeros(1, n_supp + 2 * n_supp^2) ;
+             0, - ones(1, n_supp^2), zeros(1, n_supp + 2 * n_supp^2);
+             0, zeros(1, n_supp^2), ones(1, n_supp), zeros(1, 2 * n_supp^2);
+             0, zeros(1, n_supp^2), - ones(1, n_supp), zeros(1, 2 * n_supp^2);
+             0, zeros(1, n_supp^2 + n_supp), ones(1, n_supp^2), zeros(1, n_supp^2);
+             0, zeros(1, n_supp^2 + n_supp), - ones(1, n_supp^2), zeros(1, n_supp^2)]
+b_theta = [1;
+           - 1;
+           1;
+           - 1;
+           1;
+           -1];
+       
+A_theta * theta_0 
 
-%   beta:           scalar object of interest
-%   pi:             JxJ matrix of the joint distribution of potential outcomes in $e$
-%   upsilon:        J-vector representing the PMF of Y in the untreated group in $e$
-%   gamma:          JxJ matrix of $min \{ P^e(Y \leq y_{j} | T = 0), P^e(Y \leq y_{j} | T = 1) \}$.
-%                   For the purposes of calculating the Spearman constraint, the matrix should be 
-%                   augmented by an initial row and column of zeros.
-%   lambda:         JxJ matrix of weights $\in \{0,1\}$ denoting whether $P^e(Y \leq y_{j} | T = 0) \leq P^e(Y \leq y_{j} | T = 1) \}$
-
-
-
-[m_eq, m_ineq, m_eq_std, m_ineq_std] = compute_moments_stdev(y_supp, n_supp, d, p_a, p_e, rho_l, ...
-                                                                beta, pi, upsilon, gamma, lambda, 1);
+[m_eq, m_ineq, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_0, y_supp, n_supp, d, p_a, p_e, rho_l, 1);
                                                                                                                       
 p = [1; zeros(length(theta_0) - 1, 1)];
 
-                                                            
-[KMS_confidence_interval,KMS_output] = KMS_0_Main(d, beta, pi, upsilon, gamma, lambda, ...
-            p, [], LB_theta,UB_theta, A_theta,b_theta,alpha,type,method,kappa,phi,CVXGEN_name,KMSoptions_app);
+
+KMSoptions.B            = B;
+KMSoptions.parallel     = 1 ;   % Specify if using parallel computing.  Default is to set parallel = 1 if user has toolbox installed and parallel not specified.
+KMSoptions.num_cores    = [];   % Number of cores if using parallel.  If not specified, use max number of cores.
+KMSoptions.seed         = 0;    % Seed value
+KMSoptions.CVXGEN       = 1;    % Set equal to 1 if CVXGEN is used.  Set equal to 0 if CVX is used
+
+
+[KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, ...
+            p, [], LB_theta, UB_theta, [], [], 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
                                                             
 
 % next: bootstrap moments only

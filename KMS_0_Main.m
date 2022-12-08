@@ -1,4 +1,5 @@
-function [KMS_confidence_interval,KMS_output] = KMS_0_Main(W,theta_0,p,theta_feas,LB_theta,UB_theta,A_theta,b_theta,alpha,type,CI_method,kappa,phi,CVXGEN_name,KMSoptions)
+function [KMS_confidence_interval,KMS_output] = KMS_0_Main(W, theta_0, p, theta_feas, LB_theta, UB_theta, A_theta, b_theta, ...
+    alpha, type, CI_method, kappa, phi, CVXGEN_name, KMSoptions)
 %% Code Description: Main File
 % CODE AUTHORS:
 % 	Hiroaki Kaido
@@ -200,7 +201,7 @@ options_multistart  = KMSoptions.options_multistart;% Multistart options
 seed                = KMSoptions.seed;              % Seed number for reproducibility
 siglb               = KMSoptions.siglb;
 multistart_num      = KMSoptions.multistart_num;
-CVtol               = KMSoptions.CVtol;
+CVtol               = KMSoptions.CVtol
 toldirect1          = KMSoptions.toldirect1;
 toldirect2          = KMSoptions.toldirect2;
 direct_solve        = KMSoptions.direct_solve;
@@ -216,9 +217,7 @@ end
 p  = p/norm(p,2);
 
 % Empirical moments:
-% Estimator for E_P[f(W_i)], where E_P[m(W_i,theta)] = E_P[f(W_i)] + g(theta).
-% Emprical moments are obtained first, as this defines the number of moment
-% conditions
+
 [f_ineq,f_eq,f_ineq_keep,f_eq_keep,paired_mom,J1,J2,J3]  = moments_w(W,KMSoptions);
 
 % Total number of moments:
@@ -226,8 +225,6 @@ J =  J1 + 2*J2;
 if J1 < 0 || J2 < 0 || J3 < 0 || J <= 0
     error('Invalid value of J.')
 end
-rho = -norminv(0.5*(1-(1-beta./nchoosek(J1+J2,dim_p)).^(1./dim_p)));      % size of rho-box (see Pg 30).
-c_B = norminv(1-alpha/J);                                           % Bonferroni critical value (Pg 10, after Eq 2.11)
 
 %% Error checks and adjustments
 % Check to make sure inputs are valid
@@ -265,28 +262,14 @@ else
      error('Input for phi not valid.  Either set phi = 1 for hard thresholding or phi to a function handle with one input.')
 end
 
-% Parameter space
-if isempty(LB_theta) || isempty(UB_theta)
-    error('Box constraints on the parameter space are required.')
-end
-if ~isempty(LB_theta) && max(size(LB_theta) ~= [dim_p,1])
-   error('Lower bound on parameter space incorrect size.  LB_theta should be either dimension dim_p-by-1 or empty.')
-end
-if ~isempty(UB_theta) && max(size(UB_theta) ~= [dim_p,1])
-    error('Upper bound on parameter space incorrect size. UB_theta should be either dimension dim_p-by-1 or empty.')
-end
 
-% Number of linear constraints on parameter space:
-L = size(A_theta,1); 
-if ~isempty(A_theta) && size(A_theta,2) ~= dim_p
-    error('Linear constraints on parameter space incorrect size. A_theta should be dimension L-by-dim_p.')
-end
-if ~isempty(b_theta) && max(size(b_theta) ~= [L,1])
-    error('Linear constraints on parameter space incorrect size. b_theta should be dimension L-by-1.')
-end
-if (isempty(A_theta) && ~isempty(b_theta)) ||  (~isempty(A_theta) && isempty(b_theta))
-    error('Require input of either both A_theta and b_theta or neither.')
-end
+
+% Parameter space
+
+% TODO: replace uses of LB_theta, UB_theta with appropriate use of the
+% simplex
+
+
 
 % Check other options
 if isempty(KMSoptions.BCS_EAM)
