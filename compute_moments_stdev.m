@@ -5,12 +5,15 @@ function [m_eq, m_ineq, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_s
     
     beta = theta(1);
     
-    pi = reshape(theta((1+1):(1+n_supp^2)), ...
-                    n_supp, n_supp);
+    pi = theta((1+1):(n_supp^2));
+    pi = [pi; 1 - sum(pi)];
+    pi = reshape(pi, n_supp, n_supp);
                 
-    upsilon = theta((1 + n_supp^2 + 1):(1 + n_supp^2 + n_supp));
+    upsilon = theta((n_supp^2 + 1):(n_supp^2 + n_supp - 1))
+    upsilon = [upsilon; 1 - sum(upsilon)];
     
-    gamma = reshape(theta((1 + n_supp^2 + n_supp + 1):(1 + n_supp^2 + n_supp + n_supp^2)), ...
+    % TODO stopped here
+    gamma = reshape(theta((n_supp^2 + n_supp):(n_supp^2 + n_supp + n_supp^2)), ...
                         n_supp, n_supp);
                     
     lambda = reshape(theta((1 + n_supp^2 + n_supp + n_supp^2 + 1):(1 + n_supp^2 + n_supp + n_supp^2 + n_supp^2)), ...

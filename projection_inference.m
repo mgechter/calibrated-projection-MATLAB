@@ -48,17 +48,21 @@ n_supp = length(y_supp);
 % feasible (optimal) value of parameters
 beta = 0.1735;
 
-upsilon = tab_max_postmath_std(:,3) * 0.01;
+upsilon = tab_max_postmath_std(1:(n_supp -1),3) * 0.01;
 
-pi = [0.5636    0.0331    0.0450    0.0000;
-        0.0072    0.2782    0.0000    0.0000;
-        0.0000    0.0000    0.0003    0.0464;
-        0.0000    0.0000    0.0261    0.0000];
+pi = [0.5636,    0.0331,    0.0450,    0.0000 , ...
+        0.0072,    0.2782,    0.0000,    0.0000 , ...
+        0.0000,    0.0000,    0.0003,    0.0464 , ...
+        0.0000,    0.0000,    0.0261    ]';
     
 gamma = [0.5708    0.6418    0.6418    0.6418;
             0.5708    0.8822    0.9272    0.9272;
             0.5708    0.8822    0.9536    0.9739;
             0.5708    0.8822    0.9536    1.0000];
+gamma_pmf =     [0.5708,    0.0709,    0.0000,    0.0000, ...
+                    0.0000,    0.2404,    0.0450,    0.0000, ...
+                    0.0000,    0.0000,    0.0265,    0.0202, ...
+                    0.0000,    0.0000,    0.0000]'   
         
 lambda = [0     1     1     1;
              0     0     1     1;
@@ -66,26 +70,12 @@ lambda = [0     1     1     1;
              0     0     0     0];
          
          
-theta_0 = [beta; vec(pi); upsilon; vec(gamma); vec(lambda)];
+theta_0 = [beta; pi; upsilon; vec(gamma); vec(lambda)];
 
-LB_theta = [-3; zeros(n_supp^2, 1); zeros(n_supp, 1); zeros(n_supp^2, 1); zeros(n_supp^2, 1)];
-UB_theta = [3; ones(n_supp^2, 1); ones(n_supp, 1); ones(n_supp^2, 1); ones(n_supp^2, 1)];
+LB_theta = [-3; zeros(n_supp^2 - 1, 1); zeros(n_supp - 1, 1); zeros(n_supp^2 - 1, 1); zeros(n_supp^2 - 1, 1)];
+UB_theta = [3; ones(n_supp^2 - 1, 1); ones(n_supp - 1, 1); ones(n_supp^2 - 1, 1); ones(n_supp^2 - 1, 1)];
 
-% simplex constraints
-A_theta = [ 0, ones(1, n_supp^2), zeros(1, n_supp + 2 * n_supp^2) ;
-             0, - ones(1, n_supp^2), zeros(1, n_supp + 2 * n_supp^2);
-             0, zeros(1, n_supp^2), ones(1, n_supp), zeros(1, 2 * n_supp^2);
-             0, zeros(1, n_supp^2), - ones(1, n_supp), zeros(1, 2 * n_supp^2);
-             0, zeros(1, n_supp^2 + n_supp), ones(1, n_supp^2), zeros(1, n_supp^2);
-             0, zeros(1, n_supp^2 + n_supp), - ones(1, n_supp^2), zeros(1, n_supp^2)]
-b_theta = [1;
-           - 1;
-           1;
-           - 1;
-           1;
-           -1];
-       
-A_theta * theta_0 
+
 
 [m_eq, m_ineq, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_0, y_supp, n_supp, d, p_a, p_e, rho_l, 1);
                                                                                                                       
