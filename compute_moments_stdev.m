@@ -1,8 +1,7 @@
 function [m_eq, m_ineq, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_supp, n_supp, d, p_a, p_e, rho_l, compute_stdev)
 % Compute values and standard deviations of the moments
 
-    % setup
-    
+    % setup - parameters
     beta = theta(1);
     
     pi = theta((1+1):(n_supp^2));
@@ -12,13 +11,21 @@ function [m_eq, m_ineq, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_s
     upsilon = theta((n_supp^2 + 1):(n_supp^2 + n_supp - 1))
     upsilon = [upsilon; 1 - sum(upsilon)];
     
-    % TODO stopped here
-    gamma = reshape(theta((n_supp^2 + n_supp):(n_supp^2 + n_supp + n_supp^2)), ...
+    gamma_pmf = theta((n_supp^2 + n_supp):(n_supp^2 + n_supp + n_supp^2 - 2))
+    gamma_pmf = reshape([gamma_pmf; 1 - sum(gamma_pmf)], ...
                         n_supp, n_supp);
                     
-    lambda = reshape(theta((1 + n_supp^2 + n_supp + n_supp^2 + 1):(1 + n_supp^2 + n_supp + n_supp^2 + n_supp^2)), ...
-                        n_supp, n_supp);
+    gamma = zeros(n_supp, n_supp);
+    for i = 1:n_supp
+        for j = 1:n_supp
+            gamma(i,j) = sum(gamma_pmf(1:i, 1:j), 'all');
+        end
+    end          
+    
+    lambda = reshape(theta((n_supp^2 + n_supp + n_supp^2 - 1):end), ...
+                        n_supp, n_supp)
 
+    % data
     y_dummies = dummyvar(categorical(d.max_postmath_std));
     
     n = height(d);
