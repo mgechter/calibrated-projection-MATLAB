@@ -59,25 +59,21 @@ gamma_pmf =  [0.5708,    0.0000,    0.0000,    0.0000,    0.0709,    0.2404,    
 lambda = [0     1     1     1;
              0     0     1     1;
              0     0     0     1;
-             0     0     0     0];
-         
+             0     0     0     0];    
          
 theta_0 = [beta; pi; upsilon; gamma_pmf; vec(lambda)];
 
 LB_theta = [-3; zeros(n_supp^2 - 1, 1); zeros(n_supp - 1, 1); zeros(n_supp^2 - 1, 1); zeros(n_supp^2, 1)];
 UB_theta = [3; ones(n_supp^2 - 1, 1); ones(n_supp - 1, 1); ones(n_supp^2 - 1, 1); ones(n_supp^2, 1)];
 
-% TODO: working here
-A_theta = [ 0, ones(1, n_supp^2 - 1), zeros(1, n_supp + 2 * n_supp^2) ;
-             0, zeros(1, n_supp^2), ones(1, n_supp), zeros(1, 2 * n_supp^2);
-             0, zeros(1, n_supp^2), - ones(1, n_supp), zeros(1, 2 * n_supp^2);
-             0, zeros(1, n_supp^2 + n_supp), ones(1, n_supp^2), zeros(1, n_supp^2);
-             0, zeros(1, n_supp^2 + n_supp), - ones(1, n_supp^2), zeros(1, n_supp^2)]
+% Require the PMF parameters to sum to 1 or less
+A_theta = [ 0, ones(1, n_supp^2 - 1), zeros(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2) ;
+            0, zeros(1, n_supp^2 - 1), ones(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2) ;
+            0, zeros(1, n_supp^2 - 1), zeros(1, n_supp - 1), ones(1, n_supp^2 - 1), zeros(1, n_supp^2) ];
+        
 b_theta = [1;
            1;
            1;];
-       
-A_theta * theta_0 
 
 [m_eq, m_ineq, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_0, y_supp, n_supp, d, p_a, p_e, rho_l, 1);
                                                                                                                       
@@ -93,7 +89,7 @@ KMSoptions.CVXGEN       = 1;    % Set equal to 1 if CVXGEN is used.  Set equal t
 % TODO: add A_theta, b_theta
 
 [KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, ...
-            p, [], LB_theta, UB_theta, [], [], 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
+            p, [], LB_theta, UB_theta, A_theta, b_theta, 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
                                                             
 
 % next: bootstrap moments only
