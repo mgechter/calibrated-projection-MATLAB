@@ -1,4 +1,4 @@
-function [m_eq, m_ineq, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_supp, n_supp, d, p_a, p_e, rho_l, compute_stdev)
+function [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_supp, n_supp, d, p_a, p_e, rho_l, compute_stdev)
 % Compute values and standard deviations of the moments
 
     % setup - parameters
@@ -91,9 +91,12 @@ function [m_eq, m_ineq, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_s
     spear_applied = max_spear_applied - spear_pi_applied;
     
     spear_mom_ineq = mean(spear_applied) - rho_l * 3;
-        
-    m_eq = [beta_mom; c_e_marginal_mom; t_e_marginal_mom; upsilon_mom; gamma_mom_eq];
+       
     m_ineq = [gamma_c_e_mom_ineq; gamma_t_e_mom_ineq; spear_mom_ineq];
+    J1 = length(m_ineq);
+     
+    m_eq = [beta_mom; c_e_marginal_mom; t_e_marginal_mom; upsilon_mom; gamma_mom_eq];
+    J2 = length(m_eq);
     
     if compute_stdev
         % equalities

@@ -1,9 +1,8 @@
 clear
 
-seed = 47;
-
-rng(seed);
-
+rho_l = 0.9;
+B = 100;
+alpha = 0.1;
 
 
 d = readtable("/Users/mdg5396/Data/external/balsakhi/nlp/input/full_dataset.csv");
@@ -12,9 +11,6 @@ d = d(:, ["mumbai" "bal" "max_premath_std" "max_postmath_std" "classyearid"]);
 % omit mumbai treated group
 d = d(d.mumbai == 0 | (d.mumbai == 1 & d.bal == 0), :);
 
-rho_l = 0.9;
-B = 100;
-alpha = 0.1;
 
 tab_max_premath_std = tabulate(d.max_premath_std);
 
@@ -80,15 +76,17 @@ b_theta = [1;
 p = [1; zeros(length(theta_0) - 1, 1)];
 
 
-KMSoptions.B            = B;
-KMSoptions.parallel     = 1 ;   % Specify if using parallel computing.  Default is to set parallel = 1 if user has toolbox installed and parallel not specified.
-KMSoptions.num_cores    = [];   % Number of cores if using parallel.  If not specified, use max number of cores.
-KMSoptions.seed         = 0;    % Seed value
-KMSoptions.CVXGEN       = 1;    % Set equal to 1 if CVXGEN is used.  Set equal to 0 if CVX is used
+% KMSoptions
 
-% TODO: add A_theta, b_theta
+KMSoptions  = KMSoptions_Simulation();
+
+KMSoptions.B            = B;
+KMSoptions.seed         = 0;    % Seed value
+KMSoptions.CVXGEN       = 0;    % Set equal to 1 if CVXGEN is used.  Set equal to 0 if CVX is used
+
 
 [KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, ...
+            y_supp, n_supp, p_a, p_e, rho_l, ...
             p, [], LB_theta, UB_theta, A_theta, b_theta, 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
                                                             
 

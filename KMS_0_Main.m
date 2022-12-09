@@ -1,4 +1,5 @@
-function [KMS_confidence_interval,KMS_output] = KMS_0_Main(W, theta_0, p, theta_feas, LB_theta, UB_theta, A_theta, b_theta, ...
+function [KMS_confidence_interval,KMS_output] = KMS_0_Main(W, theta_0, y_supp, ...
+    n_supp, p_a, p_e, rho_l, p, theta_feas, LB_theta, UB_theta, A_theta, b_theta, ...
     alpha, type, CI_method, kappa, phi, CVXGEN_name, KMSoptions)
 %% Code Description: Main File
 % CODE AUTHORS:
@@ -217,8 +218,11 @@ end
 p  = p/norm(p,2);
 
 % Empirical moments:
+% TODO: we so far use this just to get J1, J2... seems excessive
 
-[f_ineq,f_eq,f_ineq_keep,f_eq_keep,paired_mom,J1,J2,J3]  = moments_w(W,KMSoptions);
+[m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_0, y_supp, n_supp, W, p_a, p_e, rho_l, 0);
+J3 = 0;
+paired_mom = 0;
 
 % Total number of moments:
 J =  J1 + 2*J2;                                                   
@@ -265,9 +269,6 @@ end
 
 
 % Parameter space
-
-% TODO: replace uses of LB_theta, UB_theta with appropriate use of the
-% simplex
 
 
 
