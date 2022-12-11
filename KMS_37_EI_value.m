@@ -41,7 +41,7 @@ component = KMSoptions.component;
 % We compute the standardized moments
 % Theoretical momoments
 
-disp(d)
+%disp(d)
 
 [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_supp, n_supp, d, p_a, p_e, rho_l, 1);
 
@@ -49,8 +49,8 @@ disp(d)
 h_theta = sqrt(n)*(([m_ineq ; m_eq])./[m_ineq_std; m_eq_std]);
 
 % Drop moments close to boundary
-f_keep = [f_ineq_keep;f_eq_keep];
-h_theta(f_keep == 0,:) = [];
+%f_keep = [f_ineq_keep;f_eq_keep];
+%h_theta(f_keep == 0,:) = [];
 
 % Step 2) c(theta) and s(theta)
 % Approximated value of c(theta) using DACE
