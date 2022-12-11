@@ -65,12 +65,20 @@ component   = KMSoptions.component;
 
 %% Preliminary
 dim_e =  size(theta_Estep,1);        % Number of evaluation points
+
+disp('dim_e')
+disp(dim_e)
+disp(theta_Estep)
+
 c_Estep = zeros(dim_e,1);            % Critical value for each evaluation point
 CV_Estep = zeros(dim_e,1);
 max_violation = zeros(dim_e,1);
 flag_conv_BCS = zeros(dim_e,1);
 
 disp('init KMS_31_Estep');
+
+disp('parallel');
+disp(parallel)
 
 %% Calculate critical value for each theta_l, l=1,...,dim_e
 if parallel == 1 && BCS_EAM ~= 1
