@@ -57,7 +57,7 @@ lambda = [0     1     1     1;
              0     0     0     1;
              0     0     0     0];    
          
-theta_0 = [beta; pi; upsilon; gamma_pmf; vec(lambda)];
+theta_0 = [beta; pi; upsilon; gamma_pmf; lambda(:)];
 
 LB_theta = [-3; zeros(n_supp^2 - 1, 1); zeros(n_supp - 1, 1); zeros(n_supp^2 - 1, 1); zeros(n_supp^2, 1)];
 UB_theta = [3; ones(n_supp^2 - 1, 1); ones(n_supp - 1, 1); ones(n_supp^2 - 1, 1); ones(n_supp^2, 1)];
@@ -91,7 +91,7 @@ KMSoptions.numgrad      = true;             % Set equal to true to compute Dg us
 KMSoptions.numgrad_steplength = eps^(1/3);  % step lenght of numericalg radient
 KMSoptions.DGP          = 0;
 
-KMSoptions.parallel = 0;
+KMSoptions.parallel = 1;
 
 [KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, ...
             y_supp, n_supp, p_a, p_e, rho_l, ...
