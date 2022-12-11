@@ -92,7 +92,9 @@ function [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(th
     upsilon_cum = [0; cumsum(upsilon)];
     upsilon_cum_mat = repmat(upsilon_cum(1:n_supp), 1, n_supp);
     
-    spear_pi_coefs = 3 .* vec(pi) .* vec(upsilon_mat + 2 .* upsilon_cum_mat - 1) ./ ((1-p_a) .* p_e) ;
+    upsilon_sum = upsilon_mat + 2 .* upsilon_cum_mat - 1;
+    
+    spear_pi_coefs = 3 .* pi(:) .* upsilon_sum(:) ./ ((1-p_a) .* p_e) ;
     
     spear_pi_applied = kron(vado_t_for_dummies .* (y_dummies + 2 .*  y_lt_dummies - 1), ones(1, n_supp)) * spear_pi_coefs;
     
