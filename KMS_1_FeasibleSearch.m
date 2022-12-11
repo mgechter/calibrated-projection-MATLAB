@@ -1,4 +1,5 @@
-function [theta_feas,flag_feas] =  KMS_1_FeasibleSearch(p,theta_0,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,G_ineq,G_eq,KMSoptions)
+function [theta_feas,flag_feas] =  KMS_1_FeasibleSearch(p, theta_0, y_supp, ...
+    n_supp, p_a, p_e, rho_l, KMSoptions)
 %% Code description: EAM Feasible Search
 %  This function executes an auxiliary search for a feasible point.
 %  The algorithm attempts to find a feasible point by minimizing the
@@ -76,29 +77,31 @@ if sample_method == 0 || sample_method == 1
     theta_init = KMS_AUX2_drawpoints(multistart_num,dim_p,LB_theta,UB_theta,KMSoptions);
 else
     % Bounds define a polytope, so use hit-and-run sampling
-    theta_init = KMS_AUX2_drawpoints(multistart_num,dim_p,LB_theta,UB_theta,KMSoptions,A_theta,b_theta,theta_0);
+    theta_init = KMS_AUX2_drawpoints(multistart_num, dim_p, LB_theta, UB_theta, ...
+                                        KMSoptions, A_theta, b_theta, theta_0);
 end
 
 % Include theta_0 and bounds
 theta_init = [theta_init ; theta_0.'];
+
 M_init = size(theta_init,1);
 
 % Run fminimax over theta_init
 theta_fminimax = zeros(M_init,dim_p);
 val_fminimax   = zeros(M_init,1);
 flag_conv      = zeros(M_init,1);
+
 % Objective and constraint:
-objective_FeasibleSearch= @(theta)KMS_11_FeasibleSearch_objective(theta,KMSoptions);
-constraint_FeasibleSearch = @(theta)KMS_12_FeasibleSearch_constraint(theta,...
-    f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,KMSoptions);
+objective_FeasibleSearch= @(theta) KMS_11_FeasibleSearch_objective(theta,KMSoptions);
+constraint_FeasibleSearch = @(theta) KMS_12_FeasibleSearch_constraint(theta, y_supp, n_supp, d, p_a, p_e, rho_l, KMSoptions);
 
 % Run fmincon to find feasible points
 if parallel
     parfor ii = 1:M_init
         try
             theta_aug = [theta_init(ii,:).';0];
-            [X,V,exitflag] = fmincon(objective_FeasibleSearch,theta_aug,[A_theta, zeros(size(A_theta,1),1)],b_theta,[],[],...
-                [LB_theta;-inf],[UB_theta;inf],constraint_FeasibleSearch,options_fmincon);
+            [X,V,exitflag] = fmincon(objective_FeasibleSearch, theta_aug, [A_theta, zeros(size(A_theta,1),1)], b_theta, [], [],...
+                [LB_theta;-inf], [UB_theta;inf], constraint_FeasibleSearch, options_fmincon);
             theta_fminimax(ii,:) = X(1:dim_p,1).';
             val_fminimax(ii,1) = V;
             flag_conv(ii,1) = exitflag;
@@ -141,7 +144,7 @@ val_fminimax(ind,:) = [];
 theta_fminimax = theta_fminimax(sortind,:);
 num_fminimax = size(theta_fminimax,1);
 % CV_fminimax = zeros(num_fminimax,1);
-% CV_maxviol = zeros(num_fminimax,1);
+CV_maxviol = zeros(num_fminimax,1);
 if ~isempty(theta_fminimax)
     if parallel & BCS_EAM ~= 1
         [~,CV_fminimax,~,CV_maxviol] = KMS_31_Estep(theta_fminimax,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,G_ineq,G_eq,KMSoptions);
@@ -159,7 +162,7 @@ else
 end
 
 
-% Return of we have found a feasible point:
+% Return if we have found a feasible point:
 if ~isempty(find(CV_maxviol <= CVtol))
     flag_feas = 1;
     ind = find(CV_fminimax  <= CVtol );

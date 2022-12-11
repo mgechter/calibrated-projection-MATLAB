@@ -8,10 +8,10 @@ function [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(th
     pi = [pi; 1 - sum(pi)];
     pi = reshape(pi, n_supp, n_supp);
                 
-    upsilon = theta((n_supp^2 + 1):(n_supp^2 + n_supp - 1))
+    upsilon = theta((n_supp^2 + 1):(n_supp^2 + n_supp - 1));
     upsilon = [upsilon; 1 - sum(upsilon)];
     
-    gamma_pmf = theta((n_supp^2 + n_supp):(n_supp^2 + n_supp + n_supp^2 - 2))
+    gamma_pmf = theta((n_supp^2 + n_supp):(n_supp^2 + n_supp + n_supp^2 - 2));
     gamma_pmf = reshape([gamma_pmf; 1 - sum(gamma_pmf)], ...
                         n_supp, n_supp);
                     
@@ -23,7 +23,7 @@ function [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(th
     end          
     
     lambda = reshape(theta((n_supp^2 + n_supp + n_supp^2 - 1):end), ...
-                        n_supp, n_supp)
+                        n_supp, n_supp);
 
     % data
     y_dummies = dummyvar(categorical(d.max_postmath_std));

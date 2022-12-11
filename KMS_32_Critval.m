@@ -1,4 +1,4 @@
-function c_val = KMS_32_Critval(phi_test,f_ineq_keep,f_eq_keep,G_ineq,G_eq,Dg_ineq,Dg_eq,A_rho,b_rho,theta,KMSoptions)
+function c_val = KMS_32_Critval(theta_test, phi_test, y_supp, n_supp, d, p_a, p_e, rho_l, m_ineq, m_eq, m_ineq_std, m_eq_std, bs_classyears, KMSoptions)
 %% Critical value
 % This function computes the critical value for theta_test.
 % The critical value is the fixed point to the following problem:
@@ -203,11 +203,32 @@ else
 end
 
 elseif strcmp(CI_method,'AS')
-G = [G_ineq;G_eq];
-B = size(G,2);
-S_3_boot = max(0,max(G+repmat(phi_test,1,B)));
-c_val = quantile(S_3_boot,1-alpha);
-end
+    
+    m_eq_bs = zeros(KMSoptions.J2, B); 
+    m_ineq_bs = zeros(KMSoptions.J1, B);
 
+    % I think this is typically already inside a parfor
+    for b = 1:B
+        classyearid = bs_classyears(:,b);
+        d_b = innerjoin(table(classyearid), d);
+
+        [m_ineq_b, m_eq_b, J1, J2, m_eq_std_b, m_ineq_std_b] = compute_moments_stdev(theta_test, y_supp, n_supp, d_b, p_a, p_e, rho_l, 0);
+        
+        m_eq_bs(:,b) = m_eq_b;
+        m_ineq_bs(:,b) = m_ineq_b;
+    end
+    
+    n = KMSoptions.n;
+
+    % recenter bootstrap moments
+    G_eq   = sqrt(n).*(m_eq_bs - repelem(m_eq, 1, B))./repmat(m_eq_std, 1, B);
+    G_ineq = sqrt(n).*(m_ineq_bs - repmat(m_ineq, 1, B))./repmat(m_ineq_std, 1, B);
+    
+    G = [G_ineq;G_eq];
+    
+    % maximum    
+    S_3_boot = max(0, max(G + repmat(phi_test,1,B)));
+    c_val = quantile(S_3_boot,1-alpha);
+end
 
 end

@@ -1,4 +1,4 @@
-function [EI] = KMS_37_EI_value(theta,q,theta_hash,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,dmodel,KMSoptions)
+function [EI] = KMS_37_EI_value(theta,q,theta_hash,y_supp, n_supp, d, p_a, p_e, rho_l, bs_classyears, dmodel,KMSoptions)
 %% Code description: Expected Improvement with fmincon
 % This function computes the expected improvement at theta.
 %
@@ -40,10 +40,13 @@ component = KMSoptions.component;
 % Step 1) h_j(theta)
 % We compute the standardized moments
 % Theoretical momoments
-[g_ineq,g_eq] = moments_theta(theta,J1,J2,KMSoptions);
+
+disp(d)
+
+[m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_supp, n_supp, d, p_a, p_e, rho_l, 1);
 
 % Standardized momoments
-h_theta = sqrt(n)*(([f_ineq;f_eq] + [g_ineq;g_eq])./[f_stdev_ineq;f_stdev_eq]);
+h_theta = sqrt(n)*(([m_ineq ; m_eq])./[m_ineq_std; m_eq_std]);
 
 % Drop moments close to boundary
 f_keep = [f_ineq_keep;f_eq_keep];

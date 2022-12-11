@@ -230,6 +230,9 @@ if J1 < 0 || J2 < 0 || J3 < 0 || J <= 0
     error('Invalid value of J.')
 end
 
+rho = -norminv(0.5*(1-(1-beta./nchoosek(J1+J2,dim_p)).^(1./dim_p)));      % size of rho-box (see Pg 30).
+c_B = norminv(1-alpha/J);                                           % Bonferroni critical value (Pg 10, after Eq 2.11)
+
 %% Error checks and adjustments
 % Check to make sure inputs are valid
 if size(theta_0,2) > 1
@@ -269,6 +272,27 @@ end
 
 
 % Parameter space
+if isempty(LB_theta) || isempty(UB_theta)
+    error('Box constraints on the parameter space are required.')
+end
+if ~isempty(LB_theta) && max(size(LB_theta) ~= [dim_p,1])
+   error('Lower bound on parameter space incorrect size.  LB_theta should be either dimension dim_p-by-1 or empty.')
+end
+if ~isempty(UB_theta) && max(size(UB_theta) ~= [dim_p,1])
+    error('Upper bound on parameter space incorrect size. UB_theta should be either dimension dim_p-by-1 or empty.')
+end
+
+% Number of linear constraints on parameter space:
+L = size(A_theta,1); 
+if ~isempty(A_theta) && size(A_theta,2) ~= dim_p
+    error('Linear constraints on parameter space incorrect size. A_theta should be dimension L-by-dim_p.')
+end
+if ~isempty(b_theta) && max(size(b_theta) ~= [L,1])
+    error('Linear constraints on parameter space incorrect size. b_theta should be dimension L-by-1.')
+end
+if (isempty(A_theta) && ~isempty(b_theta)) ||  (~isempty(A_theta) && isempty(b_theta))
+    error('Require input of either both A_theta and b_theta or neither.')
+end
 
 
 
@@ -419,7 +443,10 @@ e_points_init           = KMSoptions.e_points_init;
 BCS_EAM = KMSoptions.BCS_EAM;
 mbase = KMSoptions.mbase;
 
+
 %% Re-centered Empirical Process
+% TODO- this has to be redone with candidate thetas
+%{
 % (See Pg 8, eq 2.6)
 % We compute the re-centered empirical process G.  This can be done
 % outside of the EAM loop in the separable case.  The bth recentered
@@ -458,6 +485,15 @@ if parallel == 1
         % First, draw an set of indices of length n (= number of
         % observations).  This will be used to select observations (rows) from
         % W for our bootstrap sample.
+        
+        classyears = unique(d.classyearid);
+        bs_classyear_indices = randi(length(classyears), B);
+        bs_classyears = classyears(bs_classyear_indices);
+
+        m_eq_bs = zeros(length(m_eq), B);
+        m_ineq_bs = zeros(length(m_ineq), B);
+        
+        
         ind = ceil(n*rand(n,1));
         W_b = W(ind,:);
         if J1 > 0 && J2 > 0
@@ -496,6 +532,7 @@ stream=RandStream('mlfg6331_64','Seed',seed);
 RandStream.setGlobalStream(stream);
 stream.Substream = B + B*10^3 + 1;
 
+
 % STANDARD DEVIATION
 % Compute the estimate for the standard deviation 
 [f_stdev_ineq,f_stdev_eq]= moments_stdev(W,f_ineq,f_eq,J1,J2,KMSoptions);
@@ -507,6 +544,12 @@ f_stdev_eq = max(siglb,f_stdev_eq);
 % RECENTER BOOTSTRAP MOMENTS
 G_ineq = sqrt(n).*(f_ineq_b - repelem(f_ineq,1,B))./repelem(f_stdev_ineq,1,B);
 G_eq   = sqrt(n).*(f_eq_b - repelem(f_eq,1,B))./repelem(f_stdev_eq,1,B);
+%}
+
+% draw boostrap samples
+classyears = unique(W.classyearid);
+bs_classyear_indices = randi(length(classyears), B);
+bs_classyears = classyears(bs_classyear_indices);
 
 disp('Computed moments, starting feasibility check')
 %% Feasibility
@@ -514,7 +557,8 @@ disp('Computed moments, starting feasibility check')
 % these points are feasible for the problem.  We also order the
 % points from maximizer to minimizer of p'theta.
 if ~isempty(theta_feas)
-    [~,CV_feas,~] = KMS_31_Estep(theta_feas,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,G_ineq,G_eq,KMSoptions);
+    disp('~isempty(theta_feas)')
+    [~,CV_feas,~] = KMS_31_Estep(theta_feas, y_supp, n_supp, d, p_a, p_e, rho_l, KMSoptions);
     theta_feas = theta_feas(CV_feas==0,:);
     if isempty(theta_feas)
         error('User provided matrix of feasible points, theta_feas, none of which are feasible.')
@@ -525,6 +569,8 @@ if ~isempty(theta_feas)
     [~,I] = sort(val_feas,'descend');
     theta_feas = theta_feas(I,:);
 end
+
+
 
 %% EAM - Jones' Method
 % The EAM algorithm is based on Jones' Method.  The algorithm is executed
@@ -568,7 +614,7 @@ disp('Feasible Search')
 t_EAM = tic;
 
 if isempty(theta_feas) 
-    [theta_feas,flag_feas]  = KMS_1_FeasibleSearch(p,theta_0,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,G_ineq,G_eq,KMSoptions);
+    [theta_feas,flag_feas]  =  KMS_1_FeasibleSearch(p,theta_0, y_supp, n_supp, p_a, p_e, rho_l, KMSoptions);
 else
     flag_feas = 1;
 end
@@ -579,7 +625,7 @@ end
 % we check to see if the solution(s) is feasible.  If not feasible, we add
 % it to the set of evaluation points.
 if flag_feas == 0 && BCS_EAM ~= 1
-    [theta_feas,flag_feas,theta_init,c_init,CV_init,maxviol_init]  = KMS_2_EAM_FeasibleSearch(p,theta_0,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,G_ineq,G_eq,KMSoptions);
+    [theta_feas,flag_feas,theta_init,c_init,CV_init,maxviol_init]  = KMS_2_EAM_FeasibleSearch(p, theta_0, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
 else
     theta_init = [];
     lambda_init= [];
@@ -631,8 +677,8 @@ else
     end
 end
 
-[c_add,CV_add,theta_add,maxviol_add]     = KMS_31_Estep(theta_add,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,G_ineq,G_eq,KMSoptions);
-[c_feas,CV_feas,theta_feas,maxviol_feas] = KMS_31_Estep(theta_feas,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,G_ineq,G_eq,KMSoptions);
+[c_add,CV_add,theta_add,maxviol_add]     = KMS_31_Estep(theta_add, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
+[c_feas,CV_feas,theta_feas,maxviol_feas] = KMS_31_Estep(theta_feas, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
 
 
 
@@ -688,8 +734,12 @@ if ((strcmp('one-sided-UB',type) == 1 || strcmp('two-sided',type) ==1)) && flag_
         maxviol_Estep   = [maxviol_add;maxviol_feas];
     
         % Run EAM
+        disp('line 737')
+        
         [thetaU_hat,thetaU_optbound,c,CV,EI,flagU_opt,thetaU_feas]...
-            = KMS_3_EAM(p,1,theta_feas,theta_Estep,c_Estep,CV_Estep,maxviol_Estep,theta_init,c_init,CV_init,maxviol_init,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,G_ineq,G_eq,KMSoptions);
+            = KMS_3_EAM(p,1,theta_feas,theta_Estep,c_Estep,CV_Estep,maxviol_Estep,theta_init,c_init,CV_init,maxviol_init, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
+    
+    
     end
     
     % Save additional output to the KMS_output structure

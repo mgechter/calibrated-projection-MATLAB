@@ -1,4 +1,4 @@
-function [Dg_ineq,Dg_eq] = moments_gradient(theta,J1,J2,KMSoptions)
+function [Dg_ineq,Dg_eq] = moments_gradient(theta, J1, J2, y_supp, n_supp, d, p_a, p_e, rho_l, KMSoptions)
 %% USER-SPECIFIED FUNCTION: Gradient of the moment function
 % The moment functions are in the form
 %
@@ -44,8 +44,8 @@ numgrad     =   KMSoptions.numgrad;
 
 if numgrad
     hh              = KMSoptions.numgrad_steplength;
-    g_theta_ineq    = @(param)moments_theta(param,J1,J2,KMSoptions);
-    g_theta_eq      = @(param)moments_theta_eq(param,J1,J2,KMSoptions);
+    g_theta_ineq    = @(param) get_m_ineq(param, y_supp, n_supp, d, p_a, p_e, rho_l);
+    g_theta_eq      = @(param) get_m_eq(param,y_supp, n_supp, d, p_a, p_e, rho_l);
     [Dg_ineq]       = KMS_AUX5_numgradient(theta,g_theta_ineq,hh);
     [Dg_eq]         = KMS_AUX5_numgradient(theta,g_theta_eq,hh);
     
@@ -566,26 +566,34 @@ Fqr = mvnpdf(X,mu,sigma_rho)./alpha;
 end
 
 function Fk = get_Fk(xn,i,mu,sigma_rho,upper)
-n = length(xn);
-C = sigma_rho;
-A = inv(sigma_rho);
-if i==1
-    j=2;
-elseif i==2
-    j=1;
+    n = length(xn);
+    C = sigma_rho;
+    A = inv(sigma_rho);
+    if i==1
+        j=2;
+    elseif i==2
+        j=1;
+    end
+    A_1 = A(j,j);
+    A_1_inv = inv(A_1);
+    C_1 = C(j,j);
+    c_nn = C(i,i);
+    c = C(j,i);
+    mu_1 = mu(j);
+    mu_n = mu(i);
+    f_xn = zeros(n,1);
+    p = mexBVNcdf(upper,mu,sigma_rho);
+    for l=1:n
+        m = mu_1 + (xn(l) - mu_n) .* c/c_nn;
+        f_xn(l) = exp(-0.5 .* (xn(l) - mu_n).^2./c_nn) .* normcdf(upper(l,j),m,sqrt(A_1_inv));
+    end
+    Fk = 1./p .* 1./sqrt(2 * pi * c_nn) .* f_xn;
 end
-A_1 = A(j,j);
-A_1_inv = inv(A_1);
-C_1 = C(j,j);
-c_nn = C(i,i);
-c = C(j,i);
-mu_1 = mu(j);
-mu_n = mu(i);
-f_xn = zeros(n,1);
-p = mexBVNcdf(upper,mu,sigma_rho);
-for l=1:n
-    m = mu_1 + (xn(l) - mu_n) .* c/c_nn;
-    f_xn(l) = exp(-0.5 .* (xn(l) - mu_n).^2./c_nn) .* normcdf(upper(l,j),m,sqrt(A_1_inv));
+
+function m_ineq = get_m_ineq(param, y_supp, n_supp, d, p_a, p_e, rho_l)
+    [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(param, y_supp, n_supp, d, p_a, p_e, rho_l, 0);
 end
-Fk = 1./p .* 1./sqrt(2 * pi * c_nn) .* f_xn;
+
+function m_eq = get_m_eq(param, y_supp, n_supp, d, p_a, p_e, rho_l)
+    [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(param, y_supp, n_supp, d, p_a, p_e, rho_l, 0);
 end

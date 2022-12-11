@@ -76,6 +76,9 @@ b_theta = [1;
 p = [1; zeros(length(theta_0) - 1, 1)];
 
 
+
+
+
 % KMSoptions
 
 KMSoptions  = KMSoptions_Simulation();
@@ -83,38 +86,21 @@ KMSoptions  = KMSoptions_Simulation();
 KMSoptions.B            = B;
 KMSoptions.seed         = 0;    % Seed value
 KMSoptions.CVXGEN       = 0;    % Set equal to 1 if CVXGEN is used.  Set equal to 0 if CVX is used
+KMSoptions.HR           = 1;    % use hit-and-run sampling
+KMSoptions.numgrad      = true;             % Set equal to true to compute Dg using numerical gradients. 
+KMSoptions.numgrad_steplength = eps^(1/3);  % step lenght of numericalg radient
+KMSoptions.DGP          = 0;
 
+%KMSoptions.parallel = 0;
 
 [KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, ...
             y_supp, n_supp, p_a, p_e, rho_l, ...
             p, [], LB_theta, UB_theta, A_theta, b_theta, 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
                                                             
-
 % next: bootstrap moments only
 
-% draw boostrap samples
-classyears = unique(d.classyearid);
-bs_classyear_indices = randi(length(classyears), B);
-bs_classyears = classyears(bs_classyear_indices);
 
-m_eq_bs = zeros(length(m_eq), B);
-m_ineq_bs = zeros(length(m_ineq), B);
 
-parfor b = 1:B
-    classyearid = bs_classyears(:,b);
-    d_b = innerjoin(table(classyearid), d);
-    
-    
-    [m_eq_b, m_ineq_b, m_eq_std_b, m_ineq_std_b] = compute_moments_stdev(y_supp, n_supp, d_b, p_a, p_e, rho_l, ...
-                                                                beta, pi, upsilon, gamma, lambda, 0);
-    
-    m_eq_bs(:,b) = m_eq_b;
-    m_ineq_bs(:,b) = m_ineq_b;
-end
-
-% recenter bootstrap moments
-G_eq   = sqrt(n).*(m_eq_bs - repelem(m_eq, 1, B))./repmat(m_eq_std, 1, B);
-G_ineq = sqrt(n).*(m_ineq_bs - repmat(m_ineq, 1, B))./repmat(m_ineq_std, 1, B);
 
 % Note: moment is m(W,theta) = f(W) + g(theta)
 % So measure of "close to binding" is given by

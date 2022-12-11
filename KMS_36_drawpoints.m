@@ -1,4 +1,4 @@
-function [theta_keep,EI_keep]  = KMS_36_drawpoints(theta_hash,q,r_max,r_min,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,dmodel,LB,UB,A,b,KMSoptions)
+function [theta_keep,EI_keep]  = KMS_36_drawpoints(theta_hash,q,r_max,r_min, y_supp, n_supp, d, p_a, p_e, rho_l, bs_classyears,dmodel,LB,UB,A,b,KMSoptions)
 %% Code description
 % This code draws initial points theta near theta_hash.  It checks that at
 % these draws satisfy EI>0.
@@ -123,7 +123,7 @@ while flag_while
     size_draw = size(theta_draw,1);
     
     % Find theta's that have positive EI
-    Eimprovement = @(theta)KMS_37_EI_value(theta,q,theta_hash,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,dmodel,KMSoptions);
+    Eimprovement = @(theta) KMS_37_EI_value(theta,q,theta_hash, y_supp, n_supp, d, p_a, p_e, rho_l, bs_classyears,dmodel,KMSoptions);
     EI = zeros(size_draw,1);
     if parallel
         parfor jj = 1:size_draw

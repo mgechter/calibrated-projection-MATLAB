@@ -1,4 +1,4 @@
-function [theta_feas,flag_feas,theta_out,c_out,CV_out,maxviol_out] =  KMS_2_EAM_FeasibleSearch(p,theta_0,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,G_ineq,G_eq,KMSoptions)
+function [theta_feas,flag_feas,theta_out,c_out,CV_out,maxviol_out] =  KMS_2_EAM_FeasibleSearch(p,theta_0,y_supp, n_supp, d, p_a, p_e, rho_l, bs_classyears, KMSoptions)
 %% Code description: EAM Feasible Search
 %  This function executes an auxiliary search for a feasible point.
 %  The algorithm attempts to find a feasible point by minimizing the 
@@ -106,7 +106,7 @@ maxviol_Astep = [];
 %% EAM Feasible Search Routine
 for iter=1:EAM_maxit
     % Step 1) E-step
-    [c_Estep,CV_Estep,theta_Estep,maxviol_Estep] = KMS_31_Estep(theta_Estep,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,G_ineq,G_eq,KMSoptions);
+    [c_Estep,CV_Estep,theta_Estep,maxviol_Estep] = KMS_31_Estep(theta_Estep, y_supp, n_supp, d, p_a, p_e, rho_l, bs_classyears, KMSoptions);
    
     % Update (theta,c) for the A-step
     theta_Astep = [theta_Astep ; theta_Estep];

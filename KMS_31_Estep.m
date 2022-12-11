@@ -1,4 +1,4 @@
-function [c_Estep,CV_Estep,theta_Estep,max_violation] = KMS_31_Estep(theta_Estep,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,G_ineq,G_eq,KMSoptions)
+function [c_Estep,CV_Estep,theta_Estep,max_violation] = KMS_31_Estep(theta_Estep, y_supp, n_supp, d, p_a, p_e, rho_l, bs_classyears, KMSoptions)
 %% Code Description: Evaluation Step
 % This function executes the E-step in the EAM algorithm.  See Pg 10-12,
 % and in particular:
@@ -45,7 +45,7 @@ function [c_Estep,CV_Estep,theta_Estep,max_violation] = KMS_31_Estep(theta_Estep
 %   CV_Estep            dim_e-by-1 vector that determines the constraint
 %                       violation.  theta_l is feasible iff CV_Estep =0.
 %
-%   max_violation       Maximum violation of c -standardized moments
+%   max_violation       Maximum violation of c - standardized moments
 
 %% Extract relevant information from KMSoptions
 parallel    = KMSoptions.parallel;
@@ -70,6 +70,8 @@ CV_Estep = zeros(dim_e,1);
 max_violation = zeros(dim_e,1);
 flag_conv_BCS = zeros(dim_e,1);
 
+disp('init KMS_31_Estep');
+
 %% Calculate critical value for each theta_l, l=1,...,dim_e
 if parallel == 1 && BCS_EAM ~= 1
     % Run parfor if we are running parallel program
@@ -91,15 +93,16 @@ if parallel == 1 && BCS_EAM ~= 1
         
         % Compute theoretical bounds g(theta).
         % These theoretical enter the GMS function in Eq 2.8.
-        [g_ineq,g_eq] = moments_theta(theta_test,J1,J2,KMSoptions);
+        [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_test, y_supp, n_supp, d, p_a, p_e, rho_l, 1);
         
         % Measure of close to binding (Equation 2.8)
         % Note: moment is m(W,theta) = f(W) + g(theta)
         % So measure of "close to binding" is given by
         % xi = (1/kappa)*sqrt(n)*(f(W) + g(theta))/(stdev)
         % for the moment inequalities, and zero for the moment equalities
-        xi_ineq = (1/kappa)*sqrt(n).*(f_ineq + g_ineq)./f_stdev_ineq;
-        xi = [xi_ineq; zeros(2*J2,1)];
+        xi_ineq = (1/kappa) * sqrt(n).*(m_ineq)./m_ineq_std;
+        xi = [xi_ineq; zeros(J2,1)]; % TODO: check if this is correct, in the GMS code do equalities get replaced with opposite inequalities?
+        
         
         % GMS function (Equation 2.9)
         % phi_test is the GMS function evaluated at the measure of "close
@@ -114,11 +117,14 @@ if parallel == 1 && BCS_EAM ~= 1
         % Recall m(W,theta)/std(W) = (f(W) + g(theta))/std(W).
         % So the gradient of m(W,theta)/std(W) is equal to the gradient of
         % g(theta), Dg(theta) divided by the standard error.
-        [Dg_ineq ,  Dg_eq] = moments_gradient(theta_test,J1,J2,KMSoptions);
+       [Dg_ineq ,  Dg_eq] = moments_gradient(theta_test, J1, J2, y_supp, n_supp, d, p_a, p_e, rho_l, KMSoptions);
+        
+        % TODO: simple cases seem OK, not sure about the more complicated
+        % ones
         
         % Gradients are normalized by the standard error
-        Dg_ineq = Dg_ineq./repmat(f_stdev_ineq,[1,dim_p]);
-        Dg_eq = Dg_eq./repmat(f_stdev_eq,[1,dim_p]);
+        Dg_ineq = Dg_ineq./repmat(m_ineq_std,[1, dim_p]);
+        Dg_eq = Dg_eq./repmat(m_eq_std,[1, dim_p]);
         
         % 3) Paired moment inequalities
         % The paired moments are those that are highly correlated.  We
@@ -164,15 +170,18 @@ if parallel == 1 && BCS_EAM ~= 1
         % algorithm is a root-finding algorithm that finds the root to the
         % function h(c) = (1/n) sum_b psi_b(c) - (1-alpha).  If h(c) = 0,
         % then the coverage of 1-alpha is obtained at theta_test.
-        c_Estep(ll,1) = KMS_32_Critval(phi_test,f_ineq_keep,f_eq_keep,G_ineq,G_eq,Dg_ineq,Dg_eq,A_rho,b_rho,theta_test,KMSoptions);
+        
+        
+        c_Estep(ll,1) = KMS_32_Critval(theta_test, phi_test, y_supp, n_supp, d, p_a, p_e, rho_l, m_ineq, m_eq, m_ineq_std, m_eq_std, bs_classyears, KMSoptions);
+        %disp(c_Estep(ll,1))
         
         % 6) Constraint violation
         % Standardized moments
-        m_theta = sqrt(n)*(([f_ineq;f_eq] + [g_ineq;g_eq])./[f_stdev_ineq;f_stdev_eq]);
+        m_theta = sqrt(n)*(([m_ineq; m_eq])./[m_ineq_std; m_eq_std]);
         
         % Drop moments with value of f(W) close to boundary
-        f_keep = [f_ineq_keep;f_eq_keep];
-        m_theta(f_keep == 0,:) = [];
+        %f_keep = [f_ineq_keep;f_eq_keep];
+        %m_theta(f_keep == 0,:) = [];
         
         CV_Estep(ll,1) = sum(max(0,m_theta-c_Estep(ll,1)).^2);
         
@@ -199,15 +208,15 @@ else
         
         % Compute theoretical bounds g(theta).
         % These theoretical enter the GMS function in Eq 2.8.
-        [g_ineq,g_eq] = moments_theta(theta_test,J1,J2,KMSoptions);
+        [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_test, y_supp, n_supp, d, p_a, p_e, rho_l, 1);
         
         % Measure of close to binding (Equation 2.8)
         % Note: moment is m(W,theta) = f(W) + g(theta)
         % So measure of "close to binding" is given by
         % xi = (1/kappa)*sqrt(n)*(f(W) + g(theta))/(stdev)
         % for the moment inequalities, and zero for the moment equalities
-        xi_ineq = (1/kappa)*sqrt(n).*(f_ineq + g_ineq)./f_stdev_ineq;
-        xi = [xi_ineq; zeros(2*J2,1)];
+        xi_ineq = (1/kappa) * sqrt(n).*(m_ineq)./m_ineq_std;
+        xi = [xi_ineq; zeros(J2,1)]; % TODO: check if this is correct, in the GMS code do equalities get replaced with opposite inequalities?
         
         % GMS function (Equation 2.9)
         % phi_test is the GMS function evaluated at the measure of "close
@@ -222,11 +231,14 @@ else
         % Recall m(W,theta)/std(W) = (f(W) + g(theta))/std(W).
         % So the gradient of m(W,theta)/std(W) is equal to the gradient of
         % g(theta), Dg(theta) divided by the standard error.
-        [Dg_ineq ,  Dg_eq] = moments_gradient(theta_test,J1,J2,KMSoptions);
+        [Dg_ineq ,  Dg_eq] = moments_gradient(theta_test, J1, J2, y_supp, n_supp, d, p_a, p_e, rho_l, KMSoptions);
+        
+        % TODO: simple cases seem OK, not sure about the more complicated
+        % ones
         
         % Gradients are normalized by the standard error
-        Dg_ineq = Dg_ineq./repmat(f_stdev_ineq,[1,dim_p]);
-        Dg_eq = Dg_eq./repmat(f_stdev_eq,[1,dim_p]);
+        Dg_ineq = Dg_ineq./repmat(m_ineq_std,[1, dim_p]);
+        Dg_eq = Dg_eq./repmat(m_eq_std,[1, dim_p]);
         
         % 3) Paired moment inequalities
         % The paired moments are those that are highly correlated.  We
@@ -271,16 +283,17 @@ else
             % algorithm is a root-finding algorithm that finds the root to the
             % function h(c) = (1/n) sum_b psi_b(c) - (1-alpha).  If h(c) = 0,
             % then the coverage of 1-alpha is obtained at theta_test.
-            c_Estep(ll,1) = KMS_32_Critval(phi_test,f_ineq_keep,f_eq_keep,G_ineq,G_eq,Dg_ineq,Dg_eq,A_rho,b_rho,theta_test,KMSoptions);
+            
+            c_Estep(ll,1) = KMS_32_Critval(theta_test, phi_test, y_supp, n_supp, d, p_a, p_e, rho_l, m_ineq, m_eq, m_ineq_std, m_eq_std, bs_classyears, KMSoptions);
         end
         
         % 6) Constraint violation
         % Standardized moments
-        m_theta = sqrt(n)*(([f_ineq;f_eq] + [g_ineq;g_eq])./[f_stdev_ineq;f_stdev_eq]);
+        m_theta = sqrt(n)*(([m_ineq; m_eq])./[m_ineq_std; m_eq_std]);
         
         % Drop moments close to boundary
-        f_keep = [f_ineq_keep;f_eq_keep];
-        m_theta(f_keep == 0,:) = [];
+        %f_keep = [f_ineq_keep;f_eq_keep];
+        %m_theta(f_keep == 0,:) = [];
         
         if BCS_EAM == 1
             % Constraint violation:
@@ -300,10 +313,10 @@ else
             end
         else
             % Constraint violation:
-            CV_Estep(ll,1) = sum(max(0,m_theta-c_Estep(ll,1)).^2);
+            CV_Estep(ll,1) = sum(max(0,m_theta - c_Estep(ll,1)).^2);
             
             % Maximum violation:
-            max_violation(ll,1) = max(m_theta - c_Estep(ll,1));
+            max_violation(ll,1) = max(m_theta - c_Estep(ll,1));            
         end
     end
 end
