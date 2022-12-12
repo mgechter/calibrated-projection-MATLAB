@@ -811,7 +811,8 @@ if ((strcmp('one-sided-LB',type) == 1 || strcmp('two-sided',type) ==1)) && flag_
         
         % Run EAM
         [thetaL_hat,thetaL_optbound,c,CV,EI,flagL_opt,thetaL_feas]...
-            = KMS_3_EAM(-p,-1,theta_feas,theta_Estep,c_Estep,CV_Estep,maxviol_Estep,theta_init,c_init,CV_init,maxviol_init,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,G_ineq,G_eq,KMSoptions);      
+            = KMS_3_EAM(-p,-1,theta_feas,theta_Estep,c_Estep,CV_Estep,maxviol_Estep,theta_init,c_init,CV_init,maxviol_init, ...
+                        y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);      
     end
     
     % Save additional output to the KMS_output structure

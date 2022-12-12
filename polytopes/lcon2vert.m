@@ -234,10 +234,10 @@ function [V,nr,nre]=lcon2vert(A,b,Aeq,beq,TOL,checkbounds)
   else    
       
           if nargout>1
-           [Zt,nr]=con2vert(AAA,bbb,TOL,checkbounds);
+           [Zt,nr]=con2vert(AAA,bbb);
           else
             disp('before calling con2vert')
-            Zt=con2vert(AAA,bbb,TOL,checkbounds); 
+            Zt=con2vert(AAA,bbb); 
           end
   
   end

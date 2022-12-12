@@ -44,19 +44,27 @@ n_supp = length(y_supp);
 % feasible (optimal) value of parameters
 beta = 0.1735;
 beta_lb = 0.0427;
-beta_ppd = 0.1373;
+beta_ppd = 0.1374;
 
 upsilon = tab_max_postmath_std(1:(n_supp -1),3) * 0.01;
 
 pi = [0.5636,    0.0072,    0.0000,    0.0000,    0.0331,    0.2782,    0.0000,    0.0000,    0.0450,    0.0000,    0.0003,    0.0261, ...
     0.0000,    0.0000,    0.0464]';
+
 pi_lb = [0.5617,    0.0000,    0.0091,    0.0000,    0.0800,    0.1676,    0.0376,    0.0261,    0.0000,    0.0715,    0.0000,    0.0000, ...
     0.0000, 0.0464, 0.0000]';
+pi_lb_to_reshape = [pi_lb; 1 - sum(pi_lb)];
+reshape(pi_lb_to_reshape, n_supp, n_supp)
+
 pi_ppd = [0.5708,    0.0000,    0.0000,    0.0000,    0.0709,    0.2404,    0.0000,    0.0000,    0.0000,    0.0450,    0.0265, ...
    0.0000,    0.0000,    0.0000,    0.0202]';
+pi_ppd_to_reshape = [pi_ppd; 1 - sum(pi_ppd)];
+reshape(pi_ppd_to_reshape, n_supp, n_supp)
     
 gamma_pmf =  [0.5708,    0.0000,    0.0000,    0.0000,    0.0709,    0.2404,    0.0000,    0.0000,    0.0000,    0.0450, ...
-        0.0265,    0.0000,    0.0000,    0.0000,    0.0202]';   
+        0.0265,    0.0000,    0.0000,    0.0000,    0.0202]';
+gamma_pmf_to_reshape = [gamma_pmf; 1 - sum(gamma_pmf)];
+reshape(gamma_pmf_to_reshape, n_supp, n_supp)
         
 lambda = [0     1     1     1;
              0     0     1     1;
@@ -98,36 +106,73 @@ KMSoptions.DGP          = 0;
 
 KMSoptions.parallel = 1;
 
-[KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, ...
-            y_supp, n_supp, p_a, p_e, rho_l, ...
-            p, theta_feas, LB_theta, UB_theta, A_theta, b_theta, 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
+[KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, y_supp, n_supp, p_a, p_e, rho_l, p, theta_feas, LB_theta, UB_theta, A_theta, b_theta, 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
                                                             
-% next: bootstrap moments only
+% diagnostics
+
+% lower bound
+theta = KMS_output.thetaL_EAM'
+%theta = KMS_output.thetaU_EAM'
+
+% from compute_moments_stdev
+beta = theta(1)
+
+pi = theta((1+1):(n_supp^2));
+pi = [pi; 1 - sum(pi)];
+pi = reshape(pi, n_supp, n_supp)
+
+upsilon = theta((n_supp^2 + 1):(n_supp^2 + n_supp - 1));
+upsilon = [upsilon; 1 - sum(upsilon)]
+
+gamma_pmf = theta((n_supp^2 + n_supp):(n_supp^2 + n_supp + n_supp^2 - 2));
+gamma_pmf = reshape([gamma_pmf; 1 - sum(gamma_pmf)], ...
+                    n_supp, n_supp)
+
+gamma = zeros(n_supp, n_supp);
+for i = 1:n_supp
+    for j = 1:n_supp
+        gamma(i,j) = sum(gamma_pmf(1:i, 1:j), 'all');
+    end
+end          
+
+lambda = reshape(theta((n_supp^2 + n_supp + n_supp^2 - 1):end), ...
+                    n_supp, n_supp)
+% display results
+gamma
+
+
+% check beta formula
+
+y_dummies = dummyvar(categorical(d.max_postmath_std));
+
+n = height(d);
+y_cdf_dummies = repmat(d.max_postmath_std, 1, 4) <= repmat(y_supp', n, 1);
+y_lt_dummies = repmat(d.max_postmath_std, 1, 4) < repmat(y_supp', n, 1);
+
+mumbai_for_dummies = repmat(d.mumbai == 1, 1, n_supp);
+vado_t_for_dummies = repmat(d.mumbai == 0 & d.bal == 1, 1, n_supp);
+vado_c_for_dummies = repmat(d.mumbai == 0 & d.bal == 0, 1, n_supp);
+
+beta_trans = - y_supp + sum(repmat(y_supp', n_supp, 1) ./ repmat(upsilon, 1, n_supp) .* pi, 2);
+    
+beta_applied = (y_dummies .* mumbai_for_dummies) * beta_trans;
+
+mean(y_dummies .* mumbai_for_dummies)/p_a * y_supp % correct
+mean(c_a)
+
+mean((y_dummies .* mumbai_for_dummies) * sum(repmat(y_supp', n_supp, 1) ./ repmat(upsilon, 1, n_supp) .* pi, 2))/p_a
+% also seems OK
+
+% why are these different?
+- mean(c_a) + mean((y_dummies .* mumbai_for_dummies) * sum(repmat(y_supp', n_supp, 1) ./ repmat(upsilon, 1, n_supp) .* pi, 2))/p_a
+
+mean( - ( y_dummies .* mumbai_for_dummies ) * y_supp + ( y_dummies .* mumbai_for_dummies ) * sum(repmat(y_supp', n_supp, 1) ./ repmat(upsilon, 1, n_supp) .* pi, 2))
+mean( ( y_dummies .* mumbai_for_dummies ) * (- y_supp + sum(repmat(y_supp', n_supp, 1) ./ repmat(upsilon, 1, n_supp) .* pi, 2)) )
 
 
 
-
-% Note: moment is m(W,theta) = f(W) + g(theta)
-% So measure of "close to binding" is given by
-% xi = (1/kappa)*sqrt(n)*(f(W) + g(theta))/(stdev)
+mean((y_dummies .* mumbai_for_dummies) * beta_trans)
 
 
-% Measure of close to binding (Equation 2.8)
-% for the moment inequalities, and zero for the moment equalities
-xi_ineq = (1/kappa) * sqrt(n) .* m_ineq ./m_ineq_std;
-xi = [xi_ineq; zeros(length(m_eq),1)];
 
-% GMS function (Equation 2.9)
-% phi_test is the GMS function evaluated at the measure of "close
-% to binding" xi, computed above.
-% Following KMS, the hard-threshing GMS function is used,
-% where phi = -inifity if xi < -1, 0 else.
-phi_test = phi(xi);
-
-G = [G_ineq;G_eq];
-S_3_boot = max(0, max(G + repmat(phi_test, 1, B)));
-c_val = quantile(S_3_boot, 1 - alpha)
-
-% constraint violation
-m_theta = sqrt(n)*(([m_eq; m_ineq])./[m_eq_std; m_ineq_std]);
-sum(max(0,m_theta - c_val).^2)
+beta_mom = mean(beta_applied) - beta * p_a
