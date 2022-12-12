@@ -122,13 +122,18 @@ while flag_while
     theta_draw = [theta_draw1;theta_draw2];
     size_draw = size(theta_draw,1);
     
+    disp('theta_draw')
+    disp(theta_draw)
+    disp('size_draw')
+    disp(size_draw)
+    
     % Find theta's that have positive EI
     Eimprovement = @(theta) KMS_37_EI_value(theta,q,theta_hash, y_supp, n_supp, d, p_a, p_e, rho_l, bs_classyears,dmodel,KMSoptions);
     EI = zeros(size_draw,1);
     if parallel
         parfor jj = 1:size_draw
 			try	
-            EI(jj,1) = -(max(Eimprovement( theta_draw(jj,:).')));
+                EI(jj,1) = -(max(Eimprovement( theta_draw(jj,:).')));
 			catch
 			EI(jj,1) = -1;
 			end	

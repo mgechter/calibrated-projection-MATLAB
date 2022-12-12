@@ -264,6 +264,14 @@ function [X S] = cprnd(N,A,b,options)
             c = (b - A*y)./z;
             tmin = max(c(z<0)); tmax = min(c(z>0));
             % Choose a random point on that line segment
+            
+            disp(y)
+            disp(tmin)
+            disp(tmax)
+            
+            % TODO: u ends up as NaNs, could look into why
+            disp(u)
+            
             y = y + (tmin+(tmax-tmin)*rand)*u;
         end
         

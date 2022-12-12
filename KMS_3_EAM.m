@@ -140,7 +140,10 @@ fprintf('-----------------------------------------------------------------------
 for iter=1:EAM_maxit
     if iter > 1
         % Step 1) E-step
+        
+        disp('start E-step')
         [c_Estep,CV_Estep,theta_Estep,maxviol_Estep] = KMS_31_Estep(theta_Estep, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
+        disp('end E-step')
     end
     
     % Update (theta,c) for the A-step
@@ -251,6 +254,9 @@ for iter=1:EAM_maxit
         d = abs(opt_bound - q.'*theta_hash);
         A_EI = [A_EI ; q.'];
         b_EI = [b_EI ; q.'*theta_hash + d/(h_rate^contraction_counter)];
+        
+        disp('got past contracted parameter space')
+        
     elseif sample_method == 3
         % Update lower/upper bounds
         LB_EI = LB_theta;
@@ -277,11 +283,20 @@ for iter=1:EAM_maxit
         b_EI = b_theta;     
     end
     
+    disp('before linprog')
+    
     % Update opt_dagger
     % We have contracted the parameter space, so we need to update the
     % maximum value of q'theta s.t. theta in parameter space.
+    
+    disp(-q)
+    disp(A_EI)
+    disp(b_EI)
+    
     [theta_dagger,opt_dagger] =  linprog(-q,A_EI,b_EI,[],[],LB_EI,UB_EI,[],options_linprog);
     opt_dagger = -opt_dagger;
+    
+    disp('after linprog')
 
     % Draw initial points between evaluation points.
     % The points are drawn in a particular way so that the search algorithm

@@ -558,7 +558,7 @@ disp('Computed moments, starting feasibility check')
 % points from maximizer to minimizer of p'theta.
 if ~isempty(theta_feas)
     disp('~isempty(theta_feas)')
-    [~,CV_feas,~] = KMS_31_Estep(theta_feas, y_supp, n_supp, d, p_a, p_e, rho_l, KMSoptions);
+    [~,CV_feas,~] = KMS_31_Estep(theta_feas, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
     theta_feas = theta_feas(CV_feas==0,:);
     if isempty(theta_feas)
         error('User provided matrix of feasible points, theta_feas, none of which are feasible.')
