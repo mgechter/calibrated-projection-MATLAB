@@ -557,7 +557,6 @@ disp('Computed moments, starting feasibility check')
 % these points are feasible for the problem.  We also order the
 % points from maximizer to minimizer of p'theta.
 if ~isempty(theta_feas)
-    disp('~isempty(theta_feas)')
     [~,CV_feas,~] = KMS_31_Estep(theta_feas, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
     theta_feas = theta_feas(CV_feas==0,:);
     if isempty(theta_feas)
@@ -733,9 +732,7 @@ if ((strcmp('one-sided-UB',type) == 1 || strcmp('two-sided',type) ==1)) && flag_
         CV_Estep        = [CV_add;CV_feas];
         maxviol_Estep   = [maxviol_add;maxviol_feas];
     
-        % Run EAM
-        disp('line 737')
-        
+        % Run EAM        
         [thetaU_hat,thetaU_optbound,c,CV,EI,flagU_opt,thetaU_feas]...
             = KMS_3_EAM(p,1,theta_feas,theta_Estep,c_Estep,CV_Estep,maxviol_Estep,theta_init,c_init,CV_init,maxviol_init, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
     

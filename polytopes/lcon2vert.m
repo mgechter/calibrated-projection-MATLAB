@@ -124,7 +124,6 @@ function [V,nr,nre]=lcon2vert(A,b,Aeq,beq,TOL,checkbounds)
  [A,b]=rownormalize(A,b);
  [Aeq,beq]=rownormalize(Aeq,beq);
  
-   disp('after checking args')
   if equalityConstrained && nargout>2
  
         
@@ -192,8 +191,6 @@ function [V,nr,nre]=lcon2vert(A,b,Aeq,beq,TOL,checkbounds)
     
   end
   
-  disp('after checking which kinds of constraints are present')
-  
   nnn=size(AAA,2);
   
 
@@ -236,7 +233,6 @@ function [V,nr,nre]=lcon2vert(A,b,Aeq,beq,TOL,checkbounds)
           if nargout>1
            [Zt,nr]=con2vert(AAA,bbb);
           else
-            disp('before calling con2vert')
             Zt=con2vert(AAA,bbb); 
           end
   
@@ -301,7 +297,6 @@ function [V,nr,nre]=lcon2vert(A,b,Aeq,beq,TOL,checkbounds)
 % %
 % %Modified by Matt Jacobson - March 30, 2011
 % % 
-% disp('enter con2vert')
 % 
 %    %%%3/4/2012 Improved boundedness test - unfortunately slower than Michael Kleder's
 %    if checkbounds

@@ -14,8 +14,6 @@ function S = KMS_AUX2_drawpoints(e_point,dim_p,LB,UB,KMSoptions,A,b,x0)
 % OUTPUT:
 %       S           e_point-by-dim_p matrix of points in the parameter space 
 
-disp('e_point')
-disp(e_point)
 
 HR = KMSoptions.HR;
 flag_error = 0;
@@ -90,7 +88,6 @@ else
             try 
                  S = cprnd(5*e_point,A_aug,b_aug,options);
             catch
-                disp('in catch block')
                 flag_error = 1;
             end
        end
@@ -115,51 +112,38 @@ else
 end
    
 if flag_error
-   disp('flag_error')
    % HAR did not uniformly sample correctly.  We revert to vertex sampling.
    
-   %disp(A_aug)
-   %disp(b_aug)
-   
+
    % Find vertices
    try
-       disp('try lcon2vert')
         V = lcon2vert(A_aug,b_aug);
    catch
       S = [];
-      disp('failed lcon2vert')
       return;
    end
    if isempty(V)
        S = [];
-       disp('empty V')
        return;
    end
-   disp('passed try/catch blocks')
    
    % Number of vertices
    nv = size(V,1);
-   
-   disp(nv)
    
    % Draw weights
    weight = rand(nv,e_point);
    weight = weight./repmat(sum(weight),[nv,1]);
    weight = weight.';
    
-   disp(weight)
    
    % Construct randomly sampled points
    S = weight*V;
-   
-   disp(S)
    
    % Double check points satisfy constraints
    ind = find(max(A_aug*(S.') - repmat(b_aug,[1,size(S,1)])) > 0).';
    S(ind,:) = [];
    S(e_point+1:end,:) = [];
    
-   disp('end of flag_error')
 end
 
 

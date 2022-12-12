@@ -41,8 +41,6 @@ component = KMSoptions.component;
 % We compute the standardized moments
 % Theoretical momoments
 
-%disp(d)
-
 [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_supp, n_supp, d, p_a, p_e, rho_l, 1);
 
 % Standardized momoments

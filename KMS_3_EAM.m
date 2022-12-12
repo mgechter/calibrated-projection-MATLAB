@@ -129,8 +129,6 @@ else
     opt_bound    = CI_lo;
 end
 
-disp('do we ever get the right d? yes')
-disp(size(W))
 
 %% EAM optimization routine
 % We run EAM for up to EAM_maxit times.  Each loop adds more evaluation points
@@ -141,9 +139,7 @@ for iter=1:EAM_maxit
     if iter > 1
         % Step 1) E-step
         
-        disp('start E-step')
         [c_Estep,CV_Estep,theta_Estep,maxviol_Estep] = KMS_31_Estep(theta_Estep, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
-        disp('end E-step')
     end
     
     % Update (theta,c) for the A-step
@@ -202,8 +198,6 @@ for iter=1:EAM_maxit
     theta_hash = theta_feas(ind,:).';
     maxviol_hash = maxviol_feas(ind);
     
-    disp('sample_method: ')
-    disp(sample_method)
     
     % Linear constraints:
     % We require that q'theta >= q'theta_#
@@ -255,7 +249,6 @@ for iter=1:EAM_maxit
         A_EI = [A_EI ; q.'];
         b_EI = [b_EI ; q.'*theta_hash + d/(h_rate^contraction_counter)];
         
-        disp('got past contracted parameter space')
         
     elseif sample_method == 3
         % Update lower/upper bounds
@@ -283,20 +276,13 @@ for iter=1:EAM_maxit
         b_EI = b_theta;     
     end
     
-    disp('before linprog')
-    
     % Update opt_dagger
     % We have contracted the parameter space, so we need to update the
     % maximum value of q'theta s.t. theta in parameter space.
     
-    disp(-q)
-    disp(A_EI)
-    disp(b_EI)
-    
     [theta_dagger,opt_dagger] =  linprog(-q,A_EI,b_EI,[],[],LB_EI,UB_EI,[],options_linprog);
     opt_dagger = -opt_dagger;
     
-    disp('after linprog')
 
     % Draw initial points between evaluation points.
     % The points are drawn in a particular way so that the search algorithm
@@ -306,8 +292,6 @@ for iter=1:EAM_maxit
     r_max = max(r_max, r_min);
     [theta_keep, EI_keep]  = KMS_36_drawpoints(theta_hash,q,r_max,r_min, y_supp, n_supp, d, p_a, p_e, rho_l, bs_classyears,dmodel,LB_EI,UB_EI,A_EI,b_EI,KMSoptions);
     
-    disp('check d:')
-    disp(size(W))
     
     if ~isempty(theta_keep)
         % Draw initial points between evaluation points.
@@ -318,9 +302,7 @@ for iter=1:EAM_maxit
         theta_0_fminimax = unique(theta_0_fminimax,'rows');
 
         % Find thetas that have positive EI and drop those with EI = 0
-%        
-        disp('expecting the error here')
-        disp(size(W))
+
         
         Eimprovement = @(theta) KMS_37_EI_value(theta, q, theta_hash,y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears,dmodel,KMSoptions);
         EI_fminimax = zeros(size(theta_0_fminimax, 1), 1);
