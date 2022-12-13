@@ -111,7 +111,7 @@ KMSoptions.numgrad      = true;             % Set equal to true to compute Dg us
 KMSoptions.numgrad_steplength = eps^(1/3);  % step lenght of numericalg radient
 KMSoptions.DGP          = 0;
 KMSoptions.EAM_maxit = 50;
-KMSoptions.FeasAll = 1; % try this on the cluster. locally: check how beta is working
+%KMSoptions.FeasAll = 1; % try this on the cluster. locally: check how beta is working
 KMSoptions.parallel = 1;
 
 % just looking at UB for now
