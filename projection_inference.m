@@ -75,8 +75,8 @@ theta_0 = [beta; pi; upsilon; gamma_pmf; lambda(:)];
 theta_feas = [[beta_lb; pi_lb; upsilon; gamma_pmf; lambda(:)]';
                [beta_ppd; pi_ppd; upsilon; gamma_pmf; lambda(:)]'];
 
-LB_theta = [-3; zeros(n_supp^2 - 1, 1); zeros(n_supp - 1, 1); zeros(n_supp^2 - 1, 1); zeros(n_supp^2, 1)];
-UB_theta = [3; ones(n_supp^2 - 1, 1); ones(n_supp - 1, 1); ones(n_supp^2 - 1, 1); ones(n_supp^2, 1)];
+LB_theta = [-2; zeros(n_supp^2 - 1, 1); zeros(n_supp - 1, 1); zeros(n_supp^2 - 1, 1); zeros(n_supp^2, 1)];
+UB_theta = [2; ones(n_supp^2 - 1, 1); ones(n_supp - 1, 1); ones(n_supp^2 - 1, 1); ones(n_supp^2, 1)];
 
 % Require the PMF parameters to sum to 1 or less
 A_theta = [ 0, ones(1, n_supp^2 - 1), zeros(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2) ;
@@ -103,10 +103,12 @@ KMSoptions.HR           = 1;    % use hit-and-run sampling
 KMSoptions.numgrad      = true;             % Set equal to true to compute Dg using numerical gradients. 
 KMSoptions.numgrad_steplength = eps^(1/3);  % step lenght of numericalg radient
 KMSoptions.DGP          = 0;
+KMSoptions.EAM_maxit = 50;
+
 
 KMSoptions.parallel = 1;
 
-[KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, y_supp, n_supp, p_a, p_e, rho_l, p, theta_feas, LB_theta, UB_theta, A_theta, b_theta, 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
+[KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, y_supp, n_supp, p_a, p_e, rho_l, p, [], LB_theta, UB_theta, A_theta, b_theta, 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
                                                             
 % diagnostics
 
