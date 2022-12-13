@@ -721,7 +721,9 @@ if ((strcmp('one-sided-UB',type) == 1 || strcmp('two-sided',type) ==1)) && flag_
 
             % Run EAM
             [thetaU_hat(jj,:),thetaU_optbound(jj),c(jj),CV(jj),EI(jj),flagU_opt(jj),thetaU_feas{jj}]...
-                = KMS_3_EAM(p,1,theta_feas(jj,:),theta_Estep,c_Estep,CV_Estep,maxviol_Estep,theta_init,c_init,CV_init,maxviol_init,f_ineq,f_eq,f_ineq_keep,f_eq_keep,f_stdev_ineq,f_stdev_eq,G_ineq,G_eq,KMSoptions);
+                = KMS_3_EAM(q, sgn_q, theta_feas,theta_Estep,c_Estep, ...
+                               CV_Estep,maxviol_Estep,theta_init,c_init,CV_init, ...
+                               maxviol_init,y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears,KMSoptions);
         end
         thetaU_feas = cell2mat(thetaU_feas.');
     % Run EAM from best feasible point

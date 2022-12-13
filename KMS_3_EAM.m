@@ -479,6 +479,7 @@ for iter=1:EAM_maxit
     % does not hold if the parameter is on the boundary, so we may not get
     % correct covereage
     if abs(opt_val - opt_bound) < 1e-4
+        disp(theta_hash)
         theta_hat     = theta_hash';
         theta_optbound= opt_val;
         [c,CV] = KMS_31_Estep(theta_hash.',y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
