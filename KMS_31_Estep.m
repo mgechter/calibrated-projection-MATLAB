@@ -180,6 +180,11 @@ if parallel == 1 && BCS_EAM ~= 1
         % Standardized moments
         m_theta = sqrt(n)*(([m_ineq; m_eq])./[m_ineq_std; m_eq_std]);
         
+        disp('constraint violation')
+        disp(sqrt(n) * m_eq ./ m_eq_std);
+        disp(c_Estep(ll,1));
+        
+        
         % Drop moments with value of f(W) close to boundary
         %f_keep = [f_ineq_keep;f_eq_keep];
         %m_theta(f_keep == 0,:) = [];
