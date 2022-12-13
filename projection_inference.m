@@ -41,8 +41,7 @@ n_supp = length(y_supp);
 
 % now compute the moments themselves
 
-% feasible (optimal) value of parameters
-beta = 0.1735;
+% feasible values of parameters
 beta_lb = 0.0427;
 beta_ppd = 0.1374;
 
@@ -69,9 +68,17 @@ reshape(gamma_pmf_to_reshape, n_supp, n_supp)
 lambda = [0     1     1     1;
              0     0     1     1;
              0     0     0     1;
-             0     0     0     0];    
+             0     0     0     0];
          
+ 
+beta = 0.1735;
+    
+        
 theta_0 = [beta; pi; upsilon; gamma_pmf; lambda(:)];
+[m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_0, y_supp, n_supp, d, p_a, p_e, rho_l, 0);
+m_eq
+
+
 theta_feas = [[beta_lb; pi_lb; upsilon; gamma_pmf; lambda(:)]';
                [beta_ppd; pi_ppd; upsilon; gamma_pmf; lambda(:)]'];
 
@@ -103,18 +110,24 @@ KMSoptions.HR           = 1;    % use hit-and-run sampling
 KMSoptions.numgrad      = true;             % Set equal to true to compute Dg using numerical gradients. 
 KMSoptions.numgrad_steplength = eps^(1/3);  % step lenght of numericalg radient
 KMSoptions.DGP          = 0;
-
+KMSoptions.EAM_maxit = 50;
+KMSoptions.FeasAll = 1; % try this on the cluster. locally: check how beta is working
 KMSoptions.parallel = 1;
 
-[KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, y_supp, n_supp, p_a, p_e, rho_l, p, theta_feas, LB_theta, UB_theta, A_theta, b_theta, 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
+% just looking at UB for now
+[KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, y_supp, n_supp, p_a, p_e, rho_l, p, [], LB_theta, UB_theta, A_theta, b_theta, 0.1, 'one-sided-UB', 'AS' , NaN, NaN, [], KMSoptions);
                                                             
 % diagnostics
 
 % lower bound
-theta = KMS_output.thetaL_EAM'
+theta = KMS_output.thetaL_EAM';
 %theta = KMS_output.thetaU_EAM'
 
-% from compute_moments_stdev
+[m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_supp, n_supp, d, p_a, p_e, rho_l, 0);
+m_eq
+
+
+% code copied from compute_moments_stdev
 beta = theta(1)
 
 pi = theta((1+1):(n_supp^2));
