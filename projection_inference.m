@@ -82,8 +82,8 @@ m_eq
 theta_feas = [[beta_lb; pi_lb; upsilon; gamma_pmf; lambda(:)]';
                [beta_ppd; pi_ppd; upsilon; gamma_pmf; lambda(:)]'];
 
-LB_theta = [-100; zeros(n_supp^2 - 1, 1); zeros(n_supp - 1, 1); zeros(n_supp^2 - 1, 1); zeros(n_supp^2, 1)];
-UB_theta = [300; ones(n_supp^2 - 1, 1); ones(n_supp - 1, 1); ones(n_supp^2 - 1, 1); ones(n_supp^2, 1)];
+LB_theta = [-3; zeros(n_supp^2 - 1, 1); zeros(n_supp - 1, 1); zeros(n_supp^2 - 1, 1); zeros(n_supp^2, 1)];
+UB_theta = [3; ones(n_supp^2 - 1, 1); ones(n_supp - 1, 1); ones(n_supp^2 - 1, 1); ones(n_supp^2, 1)];
 
 % Require the PMF parameters to sum to 1 or less
 A_theta = [ 0, ones(1, n_supp^2 - 1), zeros(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2) ;
@@ -114,11 +114,10 @@ KMSoptions.EAM_maxit = 50;
 %KMSoptions.FeasAll = 1; % try this on the cluster. locally: check how beta is working
 KMSoptions.parallel = 1;
 
-[KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, y_supp, n_supp, p_a, p_e, rho_l, p, [], LB_theta, UB_theta, A_theta, b_theta, 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
-KMS_confidence_interval   
-KMS_output
-
+[KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, y_supp, n_supp, p_a, p_e, rho_l, p, theta_feas, LB_theta, UB_theta, A_theta, b_theta, 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
+                                                
 % diagnostics
+KMS_output
 
 % lower bound
 theta = KMS_output.thetaL_EAM';
@@ -168,25 +167,6 @@ vado_t_for_dummies = repmat(d.mumbai == 0 & d.bal == 1, 1, n_supp);
 vado_c_for_dummies = repmat(d.mumbai == 0 & d.bal == 0, 1, n_supp);
 
 beta_trans = - y_supp + sum(repmat(y_supp', n_supp, 1) ./ repmat(upsilon, 1, n_supp) .* pi, 2);
-    
 beta_applied = (y_dummies .* mumbai_for_dummies) * beta_trans;
-
-mean(y_dummies .* mumbai_for_dummies)/p_a * y_supp % correct
-mean(c_a)
-
-mean((y_dummies .* mumbai_for_dummies) * sum(repmat(y_supp', n_supp, 1) ./ repmat(upsilon, 1, n_supp) .* pi, 2))/p_a
-% also seems OK
-
-% why are these different?
-- mean(c_a) + mean((y_dummies .* mumbai_for_dummies) * sum(repmat(y_supp', n_supp, 1) ./ repmat(upsilon, 1, n_supp) .* pi, 2))/p_a
-
-mean( - ( y_dummies .* mumbai_for_dummies ) * y_supp + ( y_dummies .* mumbai_for_dummies ) * sum(repmat(y_supp', n_supp, 1) ./ repmat(upsilon, 1, n_supp) .* pi, 2))
-mean( ( y_dummies .* mumbai_for_dummies ) * (- y_supp + sum(repmat(y_supp', n_supp, 1) ./ repmat(upsilon, 1, n_supp) .* pi, 2)) )
-
-
-
-mean((y_dummies .* mumbai_for_dummies) * beta_trans)
-
-
 
 beta_mom = mean(beta_applied) - beta * p_a
