@@ -82,8 +82,8 @@ m_eq
 theta_feas = [[beta_lb; pi_lb; upsilon; gamma_pmf; lambda(:)]';
                [beta_ppd; pi_ppd; upsilon; gamma_pmf; lambda(:)]'];
 
-LB_theta = [-2; zeros(n_supp^2 - 1, 1); zeros(n_supp - 1, 1); zeros(n_supp^2 - 1, 1); zeros(n_supp^2, 1)];
-UB_theta = [2; ones(n_supp^2 - 1, 1); ones(n_supp - 1, 1); ones(n_supp^2 - 1, 1); ones(n_supp^2, 1)];
+LB_theta = [-100; zeros(n_supp^2 - 1, 1); zeros(n_supp - 1, 1); zeros(n_supp^2 - 1, 1); zeros(n_supp^2, 1)];
+UB_theta = [300; ones(n_supp^2 - 1, 1); ones(n_supp - 1, 1); ones(n_supp^2 - 1, 1); ones(n_supp^2, 1)];
 
 % Require the PMF parameters to sum to 1 or less
 A_theta = [ 0, ones(1, n_supp^2 - 1), zeros(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2) ;
@@ -104,7 +104,7 @@ p = [1; zeros(length(theta_0) - 1, 1)];
 KMSoptions  = KMSoptions_Simulation();
 
 KMSoptions.B            = B;
-KMSoptions.seed         = 0;    % Seed value
+KMSoptions.seed         = 1;    % Seed value
 KMSoptions.CVXGEN       = 0;    % Set equal to 1 if CVXGEN is used.  Set equal to 0 if CVX is used
 KMSoptions.HR           = 1;    % use hit-and-run sampling
 KMSoptions.numgrad      = true;             % Set equal to true to compute Dg using numerical gradients. 
@@ -114,9 +114,10 @@ KMSoptions.EAM_maxit = 50;
 %KMSoptions.FeasAll = 1; % try this on the cluster. locally: check how beta is working
 KMSoptions.parallel = 1;
 
-% just looking at UB for now
 [KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, y_supp, n_supp, p_a, p_e, rho_l, p, [], LB_theta, UB_theta, A_theta, b_theta, 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
-                                                            
+KMS_confidence_interval   
+KMS_output
+
 % diagnostics
 
 % lower bound
