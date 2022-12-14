@@ -72,11 +72,11 @@ else
     if nargin <8
         options.method = 'achr';
         options.isotropic = 0;
-        %try
+        try
             S = cprnd(5*e_point,A_aug,b_aug,options);
-        %catch
+        catch
             flag_error = 1;
-        %end
+        end
     else
        options.x0 = x0;
        options.method = 'achr';

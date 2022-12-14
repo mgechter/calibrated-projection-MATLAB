@@ -222,7 +222,7 @@ else
         % xi = (1/kappa)*sqrt(n)*(f(W) + g(theta))/(stdev)
         % for the moment inequalities, and zero for the moment equalities
         xi_ineq = (1/kappa) * sqrt(n).*(m_ineq)./m_ineq_std;
-        xi = [xi_ineq; zeros(J2,1)]; % TODO: check if this is correct, in the GMS code do equalities get replaced with opposite inequalities?
+        xi = [xi_ineq; zeros(2 * J2,1)]; 
         
         % GMS function (Equation 2.9)
         % phi_test is the GMS function evaluated at the measure of "close
@@ -291,6 +291,7 @@ else
             % then the coverage of 1-alpha is obtained at theta_test.
             
             c_Estep(ll,1) = KMS_32_Critval(theta_test, phi_test, y_supp, n_supp, d, p_a, p_e, rho_l, m_ineq, m_eq, m_ineq_std, m_eq_std, bs_classyears, KMSoptions);
+      
         end
         
         % 6) Constraint violation
