@@ -224,8 +224,12 @@ p  = p/norm(p,2);
 J3 = 0;
 paired_mom = 0;
 
+
+
 % Total number of moments:
-J =  J1 + 2*J2;                                                   
+J =  J1 + 2*J2; 
+
+
 if J1 < 0 || J2 < 0 || J3 < 0 || J <= 0
     error('Invalid value of J.')
 end

@@ -204,7 +204,7 @@ end
 
 elseif strcmp(CI_method,'AS')
     
-    m_eq_bs = zeros(KMSoptions.J2, B); 
+    m_eq_bs = zeros(2*KMSoptions.J2, B); 
     m_ineq_bs = zeros(KMSoptions.J1, B);
 
     % I think this is typically already inside a parfor
@@ -226,7 +226,7 @@ elseif strcmp(CI_method,'AS')
     
     G = [G_ineq;G_eq];
     
-    % maximum    
+    % maximum        
     S_3_boot = max(0, max(G + repmat(phi_test,1,B)));
     c_val = quantile(S_3_boot,1-alpha);
 end

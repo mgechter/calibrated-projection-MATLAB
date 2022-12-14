@@ -103,8 +103,7 @@ if parallel == 1 && BCS_EAM ~= 1
         % xi = (1/kappa)*sqrt(n)*(f(W) + g(theta))/(stdev)
         % for the moment inequalities, and zero for the moment equalities
         xi_ineq = (1/kappa) * sqrt(n).*(m_ineq)./m_ineq_std;
-        xi = [xi_ineq; zeros(J2,1)]; % TODO: check if this is correct, in the GMS code do equalities get replaced with opposite inequalities?
-        
+        xi = [xi_ineq; zeros(2 * J2,1)]; 
         
         % GMS function (Equation 2.9)
         % phi_test is the GMS function evaluated at the measure of "close
@@ -179,11 +178,12 @@ if parallel == 1 && BCS_EAM ~= 1
         % 6) Constraint violation
         % Standardized moments
         m_theta = sqrt(n)*(([m_ineq; m_eq])./[m_ineq_std; m_eq_std]);
-        
-        disp('constraint violation')
-        disp(sqrt(n) * m_eq ./ m_eq_std);
-        disp(c_Estep(ll,1));
-        
+
+% TODO: remove
+%         disp('constraint violation')
+%         disp(sqrt(n) * m_eq ./ m_eq_std);
+%         disp(c_Estep(ll,1));
+%         disp(sum(max(0,m_theta-c_Estep(ll,1)).^2))
         
         % Drop moments with value of f(W) close to boundary
         %f_keep = [f_ineq_keep;f_eq_keep];
@@ -297,9 +297,9 @@ else
         % Standardized moments
         m_theta = sqrt(n)*(([m_ineq; m_eq])./[m_ineq_std; m_eq_std]);
         
-        disp('constraint violation')
-        disp(sqrt(n) * m_eq ./ m_eq_std);
-        disp(c_Estep(ll,1));
+        %disp('constraint violation')
+        %disp(sqrt(n) * m_eq ./ m_eq_std);
+        %disp(c_Estep(ll,1));
         
         % Drop moments close to boundary
         %f_keep = [f_ineq_keep;f_eq_keep];

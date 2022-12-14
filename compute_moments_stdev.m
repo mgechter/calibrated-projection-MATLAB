@@ -107,6 +107,8 @@ function [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(th
      
     m_eq = [beta_mom; c_e_marginal_mom; t_e_marginal_mom; upsilon_mom; gamma_mom_eq];
     J2 = length(m_eq);
+    % treating moment equalities as 2 opposing moment inequalities
+    m_eq = [m_eq; -m_eq];
     
     if compute_stdev
         % equalities
@@ -123,6 +125,8 @@ function [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(th
         
         % aggregate
         m_eq_std = [beta_std; c_e_marginal_std; t_e_marginal_std; upsilon_std; gamma_mom_eq_std];
+        % treating moment equalities as 2 opposing moment inequalities
+        m_eq_std = [m_eq_std; m_eq_std];
         m_ineq_std = [gamma_c_e_mom_ineq_std; gamma_t_e_mom_ineq_std; spear_mom_ineq_std];
     else
         m_eq_std = [];
