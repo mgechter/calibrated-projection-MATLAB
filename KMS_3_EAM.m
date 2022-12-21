@@ -193,6 +193,10 @@ for iter=1:EAM_maxit
     % theta_feas.
     feas = find(maxviol_Astep <= CVtol);
     theta_feas = theta_Astep(feas,:);
+    
+    disp('feasible points')
+    disp(theta_feas);
+    
     maxviol_feas = maxviol_Astep(feas);
     [~,ind] = max(theta_feas*q);
     theta_hash = theta_feas(ind,:).';
