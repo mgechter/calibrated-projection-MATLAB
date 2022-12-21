@@ -79,7 +79,8 @@ theta_0 = [beta; pi; upsilon; gamma_pmf; lambda(:)];
 m_eq
 
 
-theta_feas = [[beta_lb; pi_lb; upsilon; gamma_pmf; lambda(:)]';
+theta_feas = [theta_0';
+               [beta_lb; pi_lb; upsilon; gamma_pmf; lambda(:)]';
                [beta_ppd; pi_ppd; upsilon; gamma_pmf; lambda(:)]'];
 
 LB_theta = [-3; zeros(n_supp^2 - 1, 1); zeros(n_supp - 1, 1); zeros(n_supp^2 - 1, 1); zeros(n_supp^2, 1)];
