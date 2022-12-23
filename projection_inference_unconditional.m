@@ -6,6 +6,10 @@ alpha = 0.1;
 
 
 d = readtable("Data/full_dataset.csv");
+load("../Data/external/balsakhi/nlp/output/params_by_rho_l.mat")
+
+
+
 d = d(:, ["mumbai" "bal" "max_premath_std" "max_postmath_std" "classyearid"]);
 
 % omit mumbai treated group
