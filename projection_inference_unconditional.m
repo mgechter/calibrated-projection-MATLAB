@@ -1,45 +1,67 @@
+% TODO: working here
+
 clear
 
-rho_l = 0.9;
+%rho_l = 0.9;
 B = 100;
 alpha = 0.1;
 
 
 d = readtable("Data/full_dataset.csv");
-load("../Data/external/balsakhi/nlp/output/params_by_rho_l.mat")
-
-
-
 d = d(:, ["mumbai" "bal" "max_premath_std" "max_postmath_std" "classyearid"]);
-
 % omit mumbai treated group
 d = d(d.mumbai == 0 | (d.mumbai == 1 & d.bal == 0), :);
 
+tab_max_postmath_std = tabulate(d.max_postmath_std);
+y_supp = tab_max_postmath_std(:,1);
+n_supp = length(y_supp);
 
 tab_max_premath_std = tabulate(d.max_premath_std);
+x_supp = tab_max_premath_std(:,1)
+n_x_supp = length(x_supp)
 
-conditions = tab_max_premath_std(:,1);
-conditions = 0;
-
-max_premath_std = conditions(1);
-
-d_cond = d(d.max_premath_std == max_premath_std,:);
-
-d = d_cond;
 
 n = height(d);
-kappa = sqrt(log(n));
 
 c_e = d(d.mumbai == 0 & d.bal == 0, :).max_postmath_std;
 t_e = d(d.mumbai == 0 & d.bal == 1, :).max_postmath_std;
 c_a = d(d.mumbai == 1 & d.bal == 0, :).max_postmath_std;
 
-tab_max_postmath_std = tabulate(c_e);
+p_a = sum(d.mumbai == 1)/n;
+p_e = sum(d.mumbai == 0 & d.bal == 1)/sum(d.mumbai == 0);
 
-p_a = length(c_a)/length([c_e; t_e; c_a]);
-p_e = length(t_e)/length([c_e; t_e]);
-y_supp = tab_max_postmath_std(:,1);
-n_supp = length(y_supp);
+
+load("../Data/external/balsakhi/nlp/output/params_by_rho_l.mat")
+
+rho_ls = keys(params_by_rho_l);
+thetas = values(params_by_rho_l);
+
+length(params_by_rho_l)
+i = 1
+
+rho_l = rho_ls{i}
+theta_lb_ub = thetas{i}
+
+
+theta_lb = theta_lb_ub(1,:)';
+
+theta = theta_lb
+compute_stdev = 1
+
+
+
+compute_moments_stdev(theta_lb, y_supp, n_supp, d, p_a, p_e, rho_l, compute_stdev, x_supp, n_x_supp)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
