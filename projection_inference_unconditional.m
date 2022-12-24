@@ -50,18 +50,7 @@ compute_stdev = 1
 
 
 
-compute_moments_stdev(theta_lb, y_supp, n_supp, d, p_a, p_e, rho_l, compute_stdev, x_supp, n_x_supp)
-
-
-
-
-
-
-
-
-
-
-
+compute_moments_stdev(theta_lb, y_supp, n_supp, d, p_a, p_e, rho_l, compute_stdev, n_x_supp)
 
 
 
