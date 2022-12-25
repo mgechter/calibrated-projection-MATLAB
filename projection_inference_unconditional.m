@@ -17,8 +17,8 @@ y_supp = tab_max_postmath_std(:,1);
 n_supp = length(y_supp);
 
 tab_max_premath_std = tabulate(d.max_premath_std);
-x_supp = tab_max_premath_std(:,1)
-n_x_supp = length(x_supp)
+x_supp = tab_max_premath_std(:,1);
+n_x_supp = length(x_supp);
 
 
 n = height(d);
@@ -36,80 +36,60 @@ load("../Data/external/balsakhi/nlp/output/params_by_rho_l.mat")
 rho_ls = keys(params_by_rho_l);
 thetas = values(params_by_rho_l);
 
-length(params_by_rho_l)
-i = 1
+% get PPD theta
+ppd_rho_l = 1;
+
+theta_ppd = params_by_rho_l(ppd_rho_l);
+theta_ppd = theta_ppd(1,:);
+
+% test that moments compute
+compute_moments_stdev(theta_ppd', y_supp, n_supp, d, p_a, p_e, ppd_rho_l, 1, n_x_supp)
+
+
+% get first non-trivial rho_l parameters
+i = 1;
 
 rho_l = rho_ls{i}
 theta_lb_ub = thetas{i}
 
-
-theta_lb = theta_lb_ub(1,:)';
-
-theta = theta_lb
-compute_stdev = 1
+theta_ub = theta_lb_ub(2,:)';
+theta_0 = theta_ub
 
 
+[m_eq, m_ineq, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_ub, y_supp, n_supp, d, p_a, p_e, rho_l, 1, n_x_supp);
+m_ineq
+% neither UB nor LB fully satisfy the constraints... is feasibility with
+% respect to the GMS relaxed constraints, or the original constraints?
 
-compute_moments_stdev(theta_lb, y_supp, n_supp, d, p_a, p_e, rho_l, compute_stdev, n_x_supp)
+theta_feas = [theta_ppd;
+                theta_lb_ub];
 
-
-
-% now compute the moments themselves
-
-% feasible values of parameters
-beta_lb = 0.0427;
-beta_ppd = 0.1374;
-
-upsilon = tab_max_postmath_std(1:(n_supp -1),3) * 0.01;
-
-pi = [0.5636,    0.0072,    0.0000,    0.0000,    0.0331,    0.2782,    0.0000,    0.0000,    0.0450,    0.0000,    0.0003,    0.0261, ...
-    0.0000,    0.0000,    0.0464]';
-
-pi_lb = [0.5617,    0.0000,    0.0091,    0.0000,    0.0800,    0.1676,    0.0376,    0.0261,    0.0000,    0.0715,    0.0000,    0.0000, ...
-    0.0000, 0.0464, 0.0000]';
-pi_lb_to_reshape = [pi_lb; 1 - sum(pi_lb)];
-reshape(pi_lb_to_reshape, n_supp, n_supp)
-
-pi_ppd = [0.5708,    0.0000,    0.0000,    0.0000,    0.0709,    0.2404,    0.0000,    0.0000,    0.0000,    0.0450,    0.0265, ...
-   0.0000,    0.0000,    0.0000,    0.0202]';
-pi_ppd_to_reshape = [pi_ppd; 1 - sum(pi_ppd)];
-reshape(pi_ppd_to_reshape, n_supp, n_supp)
-    
-gamma_pmf =  [0.5708,    0.0000,    0.0000,    0.0000,    0.0709,    0.2404,    0.0000,    0.0000,    0.0000,    0.0450, ...
-        0.0265,    0.0000,    0.0000,    0.0000,    0.0202]';
-gamma_pmf_to_reshape = [gamma_pmf; 1 - sum(gamma_pmf)];
-reshape(gamma_pmf_to_reshape, n_supp, n_supp)
+            
+LB_theta = [-3; zeros(n_supp_x - 1, 1); ...
+            repmat([zeros(n_supp^2 - 1, 1); zeros(n_supp - 1, 1); zeros(n_supp^2 - 1, 1); zeros(n_supp^2, 1)], n_supp_x, 1)];
         
-lambda = [0     1     1     1;
-             0     0     1     1;
-             0     0     0     1;
-             0     0     0     0];
-         
- 
-beta = 0.1735;
-    
-        
-theta_0 = [beta; pi; upsilon; gamma_pmf; lambda(:)];
-[m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_0, y_supp, n_supp, d, p_a, p_e, rho_l, 0);
-m_eq
+UB_theta = [3; ones(n_supp_x - 1, 1); ...
+            repmat([ones(n_supp^2 - 1, 1); ones(n_supp - 1, 1); ones(n_supp^2 - 1, 1); ones(n_supp^2, 1)], n_supp_x, 1)];
 
-
-theta_feas = [[beta_lb; pi_lb; upsilon; gamma_pmf; lambda(:)]';
-               [beta_ppd; pi_ppd; upsilon; gamma_pmf; lambda(:)]'];
-
-LB_theta = [-3; zeros(n_supp^2 - 1, 1); zeros(n_supp - 1, 1); zeros(n_supp^2 - 1, 1); zeros(n_supp^2, 1)];
-UB_theta = [3; ones(n_supp^2 - 1, 1); ones(n_supp - 1, 1); ones(n_supp^2 - 1, 1); ones(n_supp^2, 1)];
+% [beta xi pi_e_lb' upsilon' gammas' lambdas']
 
 % Require the PMF parameters to sum to 1 or less
-A_theta = [ 0, ones(1, n_supp^2 - 1), zeros(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2) ;
+            % xi
+A_theta = [ 0, ones(1, n_supp_x - 1), repmat([zeros(1, n_supp^2 - 1), zeros(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2)], 4, 1);
+    
+            % next we probably need some kronecker thing
+            % TODO: stopped here
+    
+            0, ones(1, n_supp^2 - 1), zeros(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2) ;
             0, zeros(1, n_supp^2 - 1), ones(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2) ;
             0, zeros(1, n_supp^2 - 1), zeros(1, n_supp - 1), ones(1, n_supp^2 - 1), zeros(1, n_supp^2) ];
         
-b_theta = [1;
+b_theta = [
+    
+            1;
            1;
            1;];
 
-[m_eq, m_ineq, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_0, y_supp, n_supp, d, p_a, p_e, rho_l, 1);
                                                                                                                       
 p = [1; zeros(length(theta_0) - 1, 1)];
 
