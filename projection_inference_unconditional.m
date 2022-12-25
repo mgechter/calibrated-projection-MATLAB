@@ -65,30 +65,30 @@ theta_feas = [theta_ppd;
                 theta_lb_ub];
 
             
-LB_theta = [-3; zeros(n_supp_x - 1, 1); ...
-            repmat([zeros(n_supp^2 - 1, 1); zeros(n_supp - 1, 1); zeros(n_supp^2 - 1, 1); zeros(n_supp^2, 1)], n_supp_x, 1)];
+LB_theta = [-3; zeros(n_x_supp - 1, 1); ...
+            repmat([zeros(n_supp^2 - 1, 1); zeros(n_supp - 1, 1); zeros(n_supp^2 - 1, 1); zeros(n_supp^2, 1)], n_x_supp - 1, 1)];
         
-UB_theta = [3; ones(n_supp_x - 1, 1); ...
-            repmat([ones(n_supp^2 - 1, 1); ones(n_supp - 1, 1); ones(n_supp^2 - 1, 1); ones(n_supp^2, 1)], n_supp_x, 1)];
+UB_theta = [3; ones(n_x_supp - 1, 1); ...
+            repmat([ones(n_supp^2 - 1, 1); ones(n_supp - 1, 1); ones(n_supp^2 - 1, 1); ones(n_supp^2, 1)], n_x_supp - 1, 1)];
 
 % [beta xi pi_e_lb' upsilon' gammas' lambdas']
 
+
+conditional_param_restrictions = [ones(1, n_supp^2 - 1), zeros(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2) ;
+                                    zeros(1, n_supp^2 - 1), ones(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2) ;
+                                    zeros(1, n_supp^2 - 1), zeros(1, n_supp - 1), ones(1, n_supp^2 - 1), zeros(1, n_supp^2) ];
+combined_conditional_param_restrictions = kron(eye(n_x_supp), conditional_param_restrictions);
+
 % Require the PMF parameters to sum to 1 or less
             % xi
-A_theta = [ 0, ones(1, n_supp_x - 1), repmat([zeros(1, n_supp^2 - 1), zeros(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2)], 4, 1);
-    
-            % next we probably need some kronecker thing
-            % TODO: stopped here
-    
-            0, ones(1, n_supp^2 - 1), zeros(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2) ;
-            0, zeros(1, n_supp^2 - 1), ones(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2) ;
-            0, zeros(1, n_supp^2 - 1), zeros(1, n_supp - 1), ones(1, n_supp^2 - 1), zeros(1, n_supp^2) ];
+A_theta = [ 0, ones(1, n_x_supp - 1), ...
+                    repmat([zeros(1, n_supp^2 - 1), zeros(1, n_supp - 1), zeros(1, n_supp^2 - 1), zeros(1, n_supp^2)], 1, n_x_supp) ;
+            % conditional param restrictions
+            zeros(height(combined_conditional_param_restrictions), 1), zeros(height(combined_conditional_param_restrictions), n_x_supp - 1), ...
+                     combined_conditional_param_restrictions ];
+
         
-b_theta = [
-    
-            1;
-           1;
-           1;];
+b_theta = ones(height(A_theta), 1);
 
                                                                                                                       
 p = [1; zeros(length(theta_0) - 1, 1)];
@@ -106,7 +106,7 @@ KMSoptions.numgrad      = true;             % Set equal to true to compute Dg us
 KMSoptions.numgrad_steplength = eps^(1/3);  % step lenght of numericalg radient
 KMSoptions.DGP          = 0;
 KMSoptions.EAM_maxit = 50;
-%KMSoptions.FeasAll = 1; % try this on the cluster. locally: check how beta is working
+%KMSoptions.FeasAll = 1; % try this on the cluster.
 KMSoptions.parallel = 1;
 
 [KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, y_supp, n_supp, p_a, p_e, rho_l, p, theta_feas, LB_theta, UB_theta, A_theta, b_theta, 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
