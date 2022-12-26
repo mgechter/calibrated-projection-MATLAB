@@ -31,7 +31,7 @@ p_a = sum(d.mumbai == 1)/n;
 p_e = sum(d.mumbai == 0 & d.bal == 1)/sum(d.mumbai == 0);
 
 
-load("../Data/external/balsakhi/nlp/output/params_by_rho_l.mat")
+load("Data/params_by_rho_l.mat")
 
 rho_ls = keys(params_by_rho_l);
 thetas = values(params_by_rho_l);
