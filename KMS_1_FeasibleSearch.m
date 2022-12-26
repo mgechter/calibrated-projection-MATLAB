@@ -1,5 +1,5 @@
 function [theta_feas,flag_feas] =  KMS_1_FeasibleSearch(p, theta_0, y_supp, ...
-    n_supp, p_a, p_e, rho_l, KMSoptions)
+    n_supp, n_x_supp, p_a, p_e, rho_l, KMSoptions)
 %% Code description: EAM Feasible Search
 %  This function executes an auxiliary search for a feasible point.
 %  The algorithm attempts to find a feasible point by minimizing the
@@ -93,7 +93,7 @@ flag_conv      = zeros(M_init,1);
 
 % Objective and constraint:
 objective_FeasibleSearch= @(theta) KMS_11_FeasibleSearch_objective(theta,KMSoptions);
-constraint_FeasibleSearch = @(theta) KMS_12_FeasibleSearch_constraint(theta, y_supp, n_supp, d, p_a, p_e, rho_l, KMSoptions);
+constraint_FeasibleSearch = @(theta) KMS_12_FeasibleSearch_constraint(theta, y_supp, n_supp, n_x_supp, d, p_a, p_e, rho_l, KMSoptions);
 
 % Run fmincon to find feasible points
 if parallel

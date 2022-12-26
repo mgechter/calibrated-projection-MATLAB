@@ -1,4 +1,4 @@
-function c_val = KMS_32_Critval(theta_test, phi_test, y_supp, n_supp, d, p_a, p_e, rho_l, m_ineq, m_eq, m_ineq_std, m_eq_std, bs_classyears, KMSoptions)
+function c_val = KMS_32_Critval(theta_test, phi_test, y_supp, n_supp, n_x_supp, d, p_a, p_e, rho_l, m_ineq, m_eq, m_ineq_std, m_eq_std, bs_classyears, KMSoptions)
 %% Critical value
 % This function computes the critical value for theta_test.
 % The critical value is the fixed point to the following problem:
@@ -212,7 +212,7 @@ elseif strcmp(CI_method,'AS')
         classyearid = bs_classyears(:,b);
         d_b = innerjoin(table(classyearid), d);
 
-        [m_ineq_b, m_eq_b, J1, J2, m_eq_std_b, m_ineq_std_b] = compute_moments_stdev(theta_test, y_supp, n_supp, d_b, p_a, p_e, rho_l, 0);
+        [m_ineq_b, m_eq_b, J1, J2, m_eq_std_b, m_ineq_std_b] = compute_moments_stdev(theta_test, y_supp, n_supp, d_b, p_a, p_e, rho_l, 0, n_x_supp);
         
         m_eq_bs(:,b) = m_eq_b;
         m_ineq_bs(:,b) = m_ineq_b;

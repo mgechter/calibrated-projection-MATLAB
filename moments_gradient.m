@@ -1,4 +1,4 @@
-function [Dg_ineq,Dg_eq] = moments_gradient(theta, J1, J2, y_supp, n_supp, d, p_a, p_e, rho_l, KMSoptions)
+function [Dg_ineq,Dg_eq] = moments_gradient(theta, J1, J2, y_supp, n_supp, n_x_supp, d, p_a, p_e, rho_l, KMSoptions)
 %% USER-SPECIFIED FUNCTION: Gradient of the moment function
 % The moment functions are in the form
 %
@@ -44,8 +44,8 @@ numgrad     =   KMSoptions.numgrad;
 
 if numgrad
     hh              = KMSoptions.numgrad_steplength;
-    g_theta_ineq    = @(param) get_m_ineq(param, y_supp, n_supp, d, p_a, p_e, rho_l);
-    g_theta_eq      = @(param) get_m_eq(param,y_supp, n_supp, d, p_a, p_e, rho_l);
+    g_theta_ineq    = @(param) get_m_ineq(param, y_supp, n_supp, n_x_supp, d, p_a, p_e, rho_l);
+    g_theta_eq      = @(param) get_m_eq(param,y_supp, n_supp, n_x_supp, d, p_a, p_e, rho_l);
     [Dg_ineq]       = KMS_AUX5_numgradient(theta,g_theta_ineq,hh);
     [Dg_eq]         = KMS_AUX5_numgradient(theta,g_theta_eq,hh);
     
@@ -590,10 +590,10 @@ function Fk = get_Fk(xn,i,mu,sigma_rho,upper)
     Fk = 1./p .* 1./sqrt(2 * pi * c_nn) .* f_xn;
 end
 
-function m_ineq = get_m_ineq(param, y_supp, n_supp, d, p_a, p_e, rho_l)
-    [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(param, y_supp, n_supp, d, p_a, p_e, rho_l, 0);
+function m_ineq = get_m_ineq(param, y_supp, n_supp, n_x_supp, d, p_a, p_e, rho_l)
+    [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(param, y_supp, n_supp, d, p_a, p_e, rho_l, 0, n_x_supp);
 end
 
-function m_eq = get_m_eq(param, y_supp, n_supp, d, p_a, p_e, rho_l)
-    [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(param, y_supp, n_supp, d, p_a, p_e, rho_l, 0);
+function m_eq = get_m_eq(param, y_supp, n_supp, n_x_supp, d, p_a, p_e, rho_l)
+    [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(param, y_supp, n_supp, d, p_a, p_e, rho_l, 0, n_x_supp);
 end

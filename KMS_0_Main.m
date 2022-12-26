@@ -1,5 +1,5 @@
 function [KMS_confidence_interval,KMS_output] = KMS_0_Main(W, theta_0, y_supp, ...
-    n_supp, p_a, p_e, rho_l, p, theta_feas, LB_theta, UB_theta, A_theta, b_theta, ...
+    n_supp, n_x_supp, p_a, p_e, rho_l, p, theta_feas, LB_theta, UB_theta, A_theta, b_theta, ...
     alpha, type, CI_method, kappa, phi, CVXGEN_name, KMSoptions)
 %% Code Description: Main File
 % CODE AUTHORS:
@@ -220,7 +220,7 @@ p  = p/norm(p,2);
 % Empirical moments:
 % TODO: we so far use this just to get J1, J2... seems excessive
 
-[m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_0, y_supp, n_supp, W, p_a, p_e, rho_l, 0);
+[m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_0, y_supp, n_supp, W, p_a, p_e, rho_l, 0, n_x_supp);
 J3 = 0;
 paired_mom = 0;
 
@@ -560,8 +560,11 @@ disp('Computed moments, starting feasibility check')
 % If the user specifies a set of feasible points, theta_feas, we check that
 % these points are feasible for the problem.  We also order the
 % points from maximizer to minimizer of p'theta.
+
+disp(n_x_supp)
+
 if ~isempty(theta_feas)
-    [~,CV_feas,~] = KMS_31_Estep(theta_feas, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
+    [~,CV_feas,~] = KMS_31_Estep(theta_feas, y_supp, n_supp, n_x_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
     theta_feas = theta_feas(CV_feas==0,:);
     if isempty(theta_feas)
         error('User provided matrix of feasible points, theta_feas, none of which are feasible.')
@@ -680,8 +683,8 @@ else
     end
 end
 
-[c_add,CV_add,theta_add,maxviol_add]     = KMS_31_Estep(theta_add, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
-[c_feas,CV_feas,theta_feas,maxviol_feas] = KMS_31_Estep(theta_feas, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
+[c_add,CV_add,theta_add,maxviol_add]     = KMS_31_Estep(theta_add, y_supp, n_supp, n_x_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
+[c_feas,CV_feas,theta_feas,maxviol_feas] = KMS_31_Estep(theta_feas, y_supp, n_supp, n_x_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
 
 
 
@@ -725,7 +728,8 @@ if ((strcmp('one-sided-UB',type) == 1 || strcmp('two-sided',type) ==1)) && flag_
 
             % Run EAM
             [thetaU_hat(jj,:),thetaU_optbound(jj),c(jj),CV(jj),EI(jj),flagU_opt(jj),thetaU_feas{jj}]...
-                = KMS_3_EAM(p,1,theta_feas(jj,:),theta_Estep,c_Estep,CV_Estep,maxviol_Estep,theta_init,c_init,CV_init,maxviol_init, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
+                = KMS_3_EAM(p,1,theta_feas(jj,:),theta_Estep,c_Estep,CV_Estep,maxviol_Estep,theta_init,c_init,CV_init,maxviol_init, y_supp, ...
+                            n_supp, n_x_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
         end
         thetaU_feas = cell2mat(thetaU_feas.');
     % Run EAM from best feasible point
@@ -738,7 +742,8 @@ if ((strcmp('one-sided-UB',type) == 1 || strcmp('two-sided',type) ==1)) && flag_
     
         % Run EAM        
         [thetaU_hat,thetaU_optbound,c,CV,EI,flagU_opt,thetaU_feas]...
-            = KMS_3_EAM(p,1,theta_feas,theta_Estep,c_Estep,CV_Estep,maxviol_Estep,theta_init,c_init,CV_init,maxviol_init, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
+            = KMS_3_EAM(p,1,theta_feas,theta_Estep,c_Estep,CV_Estep,maxviol_Estep,theta_init,c_init,CV_init,maxviol_init, y_supp, n_supp, n_x_supp, ... 
+                          W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
     
     
     end
@@ -799,7 +804,8 @@ if ((strcmp('one-sided-LB',type) == 1 || strcmp('two-sided',type) ==1)) && flag_
 
             % Run EAM
             [thetaL_hat(jj,:),thetaL_optbound(jj),c(jj),CV(jj),EI(jj),flagL_opt(jj),thetaL_feas{jj}]...
-                = KMS_3_EAM(-p,-1,theta_feas(jj,:),theta_Estep,c_Estep,CV_Estep,maxviol_Estep,theta_init,c_init,CV_init,maxviol_init, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);      
+                = KMS_3_EAM(-p,-1,theta_feas(jj,:),theta_Estep,c_Estep,CV_Estep,maxviol_Estep,theta_init,c_init,CV_init,maxviol_init, y_supp, ...
+                            n_supp, n_x_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);      
 
         end
         thetaL_feas = cell2mat(thetaL_feas.');
@@ -814,7 +820,7 @@ if ((strcmp('one-sided-LB',type) == 1 || strcmp('two-sided',type) ==1)) && flag_
         % Run EAM
         [thetaL_hat,thetaL_optbound,c,CV,EI,flagL_opt,thetaL_feas]...
             = KMS_3_EAM(-p,-1,theta_feas,theta_Estep,c_Estep,CV_Estep,maxviol_Estep,theta_init,c_init,CV_init,maxviol_init, ...
-                        y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);      
+                        y_supp, n_supp, n_x_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);      
     end
     
     % Save additional output to the KMS_output structure

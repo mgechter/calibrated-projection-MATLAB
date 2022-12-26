@@ -1,4 +1,4 @@
-function [m_theta,Ceq,Dm_theta,DCeq] = KMS_12_FeasibleSearch_constraint(theta_aug, y_supp, n_supp, d, p_a, p_e, rho_l, KMSoptions)
+function [m_theta,Ceq,Dm_theta,DCeq] = KMS_12_FeasibleSearch_constraint(theta_aug, y_supp, n_supp, n_x_supp, d, p_a, p_e, rho_l, KMSoptions)
 %% Code description: Expected Improvement with fmincon
 % This function computes the objective of the fminimax program using
 % fmincon.  The objective function is simply gamma, a constant.  
@@ -49,7 +49,7 @@ DCeq = [];
 
 %% Standardized moments
 % Theoretical moments:
-[m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_supp, n_supp, d, p_a, p_e, rho_l, 1);
+[m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_supp, n_supp, d, p_a, p_e, rho_l, 1, n_x_supp);
 
 % Standardized momoments using empirical and theoretical moments:
 m_theta = sqrt(n)*(([m_ineq; m_eq])./[m_eq_std; m_ineq_std]);

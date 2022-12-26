@@ -1,6 +1,6 @@
 function [theta_hat,theta_optbound,c,CV,EI,flag_opt,theta_feas_out] =  KMS_3_EAM(q, sgn_q, theta_feas,theta_Estep,c_Estep, ...
                                                                                    CV_Estep,maxviol_Estep,theta_init,c_init,CV_init, ...
-                                                                                   maxviol_init,y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears,KMSoptions)
+                                                                                   maxviol_init,y_supp, n_supp, n_x_supp, W, p_a, p_e, rho_l, bs_classyears,KMSoptions)
 %% Code description: EAM
 %  This function executes the EAM algorithm and outputs the KMS interval. 
 %  For a complete description of EAM see Pages 12-13.
@@ -139,7 +139,7 @@ for iter=1:EAM_maxit
     if iter > 1
         % Step 1) E-step
         
-        [c_Estep,CV_Estep,theta_Estep,maxviol_Estep] = KMS_31_Estep(theta_Estep, y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
+        [c_Estep,CV_Estep,theta_Estep,maxviol_Estep] = KMS_31_Estep(theta_Estep, y_supp, n_supp, n_x_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
     end
     
     % Update (theta,c) for the A-step
@@ -294,7 +294,8 @@ for iter=1:EAM_maxit
     % r_max is the distance from theta_hash to the boundary.
     r_max = abs(opt_dagger - q.'*theta_hash);
     r_max = max(r_max, r_min);
-    [theta_keep, EI_keep]  = KMS_36_drawpoints(theta_hash,q,r_max,r_min, y_supp, n_supp, d, p_a, p_e, rho_l, bs_classyears,dmodel,LB_EI,UB_EI,A_EI,b_EI,KMSoptions);
+    [theta_keep, EI_keep]  = KMS_36_drawpoints(theta_hash,q,r_max,r_min, y_supp, n_supp, n_x_supp,
+                                                d, p_a, p_e, rho_l, bs_classyears,dmodel,LB_EI,UB_EI,A_EI,b_EI,KMSoptions);
     
     
     if ~isempty(theta_keep)
@@ -308,7 +309,7 @@ for iter=1:EAM_maxit
         % Find thetas that have positive EI and drop those with EI = 0
 
         
-        Eimprovement = @(theta) KMS_37_EI_value(theta, q, theta_hash,y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears,dmodel,KMSoptions);
+        Eimprovement = @(theta) KMS_37_EI_value(theta, q, theta_hash,y_supp, n_supp, n_x_supp, W, p_a, p_e, rho_l, bs_classyears,dmodel,KMSoptions);
         EI_fminimax = zeros(size(theta_0_fminimax, 1), 1);
         if parallel
             parfor jj = 1:size(theta_0_fminimax,1)
@@ -486,7 +487,7 @@ for iter=1:EAM_maxit
         disp(theta_hash)
         theta_hat     = theta_hash';
         theta_optbound= opt_val;
-        [c,CV] = KMS_31_Estep(theta_hash.',y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
+        [c,CV] = KMS_31_Estep(theta_hash.',y_supp, n_supp, n_x_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
         EI =  EI(1);
         flag_opt =1;
         warning('Parameter is on the boundary.  The confidence set might not deliver the correct coverage.  Consider expanding the parameter space.')
@@ -497,7 +498,7 @@ for iter=1:EAM_maxit
     if (iter >= EAM_minit &&  change_EI_proj < EAM_obj_tol && change_proj < EAM_tol && feas_points>num_feas && abs(opt_dagger - q.'*theta_hash) > 1e-4 && abs(maxviol_hash) <EAM_maxviol_tol)
         theta_hat     = theta_hash';
         theta_optbound= opt_val;
-        [c,CV] = KMS_31_Estep(theta_hash.', y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears,KMSoptions);
+        [c,CV] = KMS_31_Estep(theta_hash.', y_supp, n_supp, n_x_supp, W, p_a, p_e, rho_l, bs_classyears,KMSoptions);
         EI =  EI(1);
         flag_opt =1;
         feas = find(maxviol_Astep <= CVtol);
@@ -522,7 +523,7 @@ end
 % If failed to converge, output failure flag
 theta_hat = theta_hash';
 theta_optbound = opt_val;
-[c,CV] = KMS_31_Estep(theta_hash.',y_supp, n_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
+[c,CV] = KMS_31_Estep(theta_hash.',y_supp, n_supp, n_x_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
 EI =  EI(1);
 flag_opt = 0;
 feas = find(maxviol_Astep <= CVtol);

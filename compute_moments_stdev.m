@@ -51,7 +51,6 @@ function [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(th
     
     beta_applied = zeros(n, 1);
     
-    J1 = 0;
     J2 = length(xi_moment) + 1; % includes beta
     
     m_ineq = [];
@@ -145,11 +144,10 @@ function [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(th
 
         spear_applied = max_spear_applied - spear_pi_applied;
 
-        spear_mom_ineq = mean(spear_applied) - rho_l * 3
+        spear_mom_ineq = mean(spear_applied) - rho_l * 3;
 
         m_ineq = [m_ineq; gamma_c_e_mom_ineq; gamma_t_e_mom_ineq; spear_mom_ineq];
-        J1 = J1 + length(m_ineq);
-
+        
         m_eq_l = [c_e_marginal_mom; t_e_marginal_mom; upsilon_mom; gamma_mom_eq];
         J2 = J2 + length(m_eq_l);
         % treating moment equalities as 2 opposing moment inequalities
@@ -181,7 +179,8 @@ function [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(th
     
     beta_mom = mean(beta_applied) - beta * p_a;
     m_eq = [beta_mom; -beta_mom; m_eq];
-    
+   
+    J1 = length(m_ineq);
     
     beta_std = std(beta_applied);
     m_eq_std = [beta_std; beta_std; m_eq_std];

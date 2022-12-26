@@ -1,4 +1,4 @@
-function [c_Estep,CV_Estep,theta_Estep,max_violation] = KMS_31_Estep(theta_Estep, y_supp, n_supp, d, p_a, p_e, rho_l, bs_classyears, KMSoptions)
+function [c_Estep,CV_Estep,theta_Estep,max_violation] = KMS_31_Estep(theta_Estep, y_supp, n_supp, n_x_supp, d, p_a, p_e, rho_l, bs_classyears, KMSoptions)
 %% Code Description: Evaluation Step
 % This function executes the E-step in the EAM algorithm.  See Pg 10-12,
 % and in particular:
@@ -73,6 +73,7 @@ max_violation = zeros(dim_e,1);
 flag_conv_BCS = zeros(dim_e,1);
 
 disp('init KMS_31_Estep');
+disp(n_x_supp);
 
 %% Calculate critical value for each theta_l, l=1,...,dim_e
 if parallel == 1 && BCS_EAM ~= 1
@@ -95,7 +96,7 @@ if parallel == 1 && BCS_EAM ~= 1
         
         % Compute theoretical bounds g(theta).
         % These theoretical enter the GMS function in Eq 2.8.
-        [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_test, y_supp, n_supp, d, p_a, p_e, rho_l, 1);
+        [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_test, y_supp, n_supp, d, p_a, p_e, rho_l, 1, n_x_supp);
         
         % Measure of close to binding (Equation 2.8)
         % Note: moment is m(W,theta) = f(W) + g(theta)
@@ -118,7 +119,7 @@ if parallel == 1 && BCS_EAM ~= 1
         % Recall m(W,theta)/std(W) = (f(W) + g(theta))/std(W).
         % So the gradient of m(W,theta)/std(W) is equal to the gradient of
         % g(theta), Dg(theta) divided by the standard error.
-       [Dg_ineq ,  Dg_eq] = moments_gradient(theta_test, J1, J2, y_supp, n_supp, d, p_a, p_e, rho_l, KMSoptions);
+       [Dg_ineq ,  Dg_eq] = moments_gradient(theta_test, J1, J2, y_supp, n_supp, n_x_supp, d, p_a, p_e, rho_l, KMSoptions);
         
         % TODO: simple cases seem OK, not sure about the more complicated
         % ones
@@ -173,7 +174,8 @@ if parallel == 1 && BCS_EAM ~= 1
         % then the coverage of 1-alpha is obtained at theta_test.
         
         
-        c_Estep(ll,1) = KMS_32_Critval(theta_test, phi_test, y_supp, n_supp, d, p_a, p_e, rho_l, m_ineq, m_eq, m_ineq_std, m_eq_std, bs_classyears, KMSoptions);
+        c_Estep(ll,1) = KMS_32_Critval(theta_test, phi_test, y_supp, n_supp, n_x_supp, ...
+                                        d, p_a, p_e, rho_l, m_ineq, m_eq, m_ineq_std, m_eq_std, bs_classyears, KMSoptions);
         
         % 6) Constraint violation
         % Standardized moments
@@ -214,7 +216,7 @@ else
         
         % Compute theoretical bounds g(theta).
         % These theoretical enter the GMS function in Eq 2.8.
-        [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_test, y_supp, n_supp, d, p_a, p_e, rho_l, 1);
+        [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_test, y_supp, n_supp, d, p_a, p_e, rho_l, 1, n_x_supp);
         
         % Measure of close to binding (Equation 2.8)
         % Note: moment is m(W,theta) = f(W) + g(theta)
@@ -237,7 +239,7 @@ else
         % Recall m(W,theta)/std(W) = (f(W) + g(theta))/std(W).
         % So the gradient of m(W,theta)/std(W) is equal to the gradient of
         % g(theta), Dg(theta) divided by the standard error.
-        [Dg_ineq ,  Dg_eq] = moments_gradient(theta_test, J1, J2, y_supp, n_supp, d, p_a, p_e, rho_l, KMSoptions);
+        [Dg_ineq ,  Dg_eq] = moments_gradient(theta_test, J1, J2, y_supp, n_supp, n_x_supp, d, p_a, p_e, rho_l, KMSoptions);
         
         % TODO: simple cases seem OK, not sure about the more complicated
         % ones
@@ -290,7 +292,8 @@ else
             % function h(c) = (1/n) sum_b psi_b(c) - (1-alpha).  If h(c) = 0,
             % then the coverage of 1-alpha is obtained at theta_test.
             
-            c_Estep(ll,1) = KMS_32_Critval(theta_test, phi_test, y_supp, n_supp, d, p_a, p_e, rho_l, m_ineq, m_eq, m_ineq_std, m_eq_std, bs_classyears, KMSoptions);
+            c_Estep(ll,1) = KMS_32_Critval(theta_test, phi_test, y_supp, n_supp, n_x_supp, ...
+                                            d, p_a, p_e, rho_l, m_ineq, m_eq, m_ineq_std, m_eq_std, bs_classyears, KMSoptions);
       
         end
         

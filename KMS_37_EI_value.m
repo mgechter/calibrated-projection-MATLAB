@@ -1,4 +1,4 @@
-function [EI] = KMS_37_EI_value(theta,q,theta_hash,y_supp, n_supp, d, p_a, p_e, rho_l, bs_classyears, dmodel,KMSoptions)
+function [EI] = KMS_37_EI_value(theta,q,theta_hash,y_supp, n_supp, n_x_supp, d, p_a, p_e, rho_l, bs_classyears, dmodel,KMSoptions)
 %% Code description: Expected Improvement with fmincon
 % This function computes the expected improvement at theta.
 %
@@ -41,7 +41,7 @@ component = KMSoptions.component;
 % We compute the standardized moments
 % Theoretical momoments
 
-[m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_supp, n_supp, d, p_a, p_e, rho_l, 1);
+[m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta, y_supp, n_supp, d, p_a, p_e, rho_l, 1, n_x_supp);
 
 % Standardized momoments
 h_theta = sqrt(n)*(([m_ineq ; m_eq])./[m_ineq_std; m_eq_std]);
