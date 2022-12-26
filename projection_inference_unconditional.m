@@ -107,7 +107,7 @@ KMSoptions.numgrad_steplength = eps^(1/3);  % step lenght of numericalg radient
 KMSoptions.DGP          = 0;
 KMSoptions.EAM_maxit = 50;
 %KMSoptions.FeasAll = 1; % try this on the cluster.
-KMSoptions.parallel = 0;
+KMSoptions.parallel = 1;
 
 [KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, y_supp, n_supp, n_x_supp, p_a, p_e, rho_l, p, theta_feas, LB_theta, UB_theta, A_theta, b_theta, 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
                                                 
