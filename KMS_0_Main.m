@@ -683,6 +683,9 @@ else
     end
 end
 
+disp('size theta_add');
+disp(size(theta_add));
+
 [c_add,CV_add,theta_add,maxviol_add]     = KMS_31_Estep(theta_add, y_supp, n_supp, n_x_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
 [c_feas,CV_feas,theta_feas,maxviol_feas] = KMS_31_Estep(theta_feas, y_supp, n_supp, n_x_supp, W, p_a, p_e, rho_l, bs_classyears, KMSoptions);
 

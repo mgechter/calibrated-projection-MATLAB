@@ -2,8 +2,10 @@
 
 clear
 
-%rho_l = 0.9;
-B = 100;
+rho_l = 0.5;
+B = 300;
+
+
 alpha = 0.1;
 
 
@@ -46,11 +48,8 @@ theta_ppd = theta_ppd(1,:);
 compute_moments_stdev(theta_ppd', y_supp, n_supp, d, p_a, p_e, ppd_rho_l, 1, n_x_supp)
 
 
-% get first non-trivial rho_l parameters
-i = 1;
-
-rho_l = rho_ls{i}
-theta_lb_ub = thetas{i}
+% get the desired rho_l parameters
+theta_lb_ub = params_by_rho_l(rho_l)
 
 theta_ub = theta_lb_ub(2,:)';
 theta_0 = theta_ub
