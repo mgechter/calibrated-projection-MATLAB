@@ -114,6 +114,8 @@ KMSoptions.parallel = 1;
 % diagnostics
 KMS_output
 
+save(rho_l + ".mat");
+
 % lower bound
 theta = KMS_output.thetaL_EAM';
 %theta = KMS_output.thetaU_EAM'
