@@ -294,7 +294,7 @@ for iter=1:EAM_maxit
     % r_max is the distance from theta_hash to the boundary.
     r_max = abs(opt_dagger - q.'*theta_hash);
     r_max = max(r_max, r_min);
-    [theta_keep, EI_keep]  = KMS_36_drawpoints(theta_hash,q,r_max,r_min, y_supp, n_supp, n_x_supp,
+    [theta_keep, EI_keep]  = KMS_36_drawpoints(theta_hash,q,r_max,r_min, y_supp, n_supp, n_x_supp, ...
                                                 d, p_a, p_e, rho_l, bs_classyears,dmodel,LB_EI,UB_EI,A_EI,b_EI,KMSoptions);
     
     
