@@ -3,10 +3,10 @@
 clear
 
 rho_l = 0.5;
-B = 300;
+B = 301;
 
 
-alpha = 0.1;
+alpha = 0.2;
 
 
 d = readtable("Data/full_dataset.csv");
@@ -113,7 +113,7 @@ KMSoptions.parallel = 1;
 % diagnostics
 KMS_output
 
-save(rho_l + ".mat");
+save(rho_l + "_" + alpha + ".mat");
 
 % lower bound
 theta = KMS_output.thetaL_EAM';
