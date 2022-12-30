@@ -108,7 +108,7 @@ KMSoptions.EAM_maxit = 50;
 %KMSoptions.FeasAll = 1; % try this on the cluster.
 KMSoptions.parallel = 1;
 
-[KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, y_supp, n_supp, n_x_supp, p_a, p_e, rho_l, p, theta_feas, LB_theta, UB_theta, A_theta, b_theta, 0.1, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
+[KMS_confidence_interval,KMS_output] = KMS_0_Main(d, theta_0, y_supp, n_supp, n_x_supp, p_a, p_e, rho_l, p, theta_feas, LB_theta, UB_theta, A_theta, b_theta, alpha, 'two-sided', 'AS' , NaN, NaN, [], KMSoptions);
                                                 
 % diagnostics
 KMS_output
