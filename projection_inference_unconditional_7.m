@@ -3,7 +3,7 @@
 clear
 
 rho_l = 0.7;
-B = 301;
+B = 300;
 
 
 alpha = 0.2;
