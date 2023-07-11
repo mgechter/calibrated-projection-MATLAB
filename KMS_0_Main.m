@@ -218,8 +218,6 @@ end
 p  = p/norm(p,2);
 
 % Empirical moments:
-% TODO: we so far use this just to get J1, J2... seems excessive
-
 [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(theta_0, y_supp, n_supp, W, p_a, p_e, rho_l, 0, n_x_supp);
 J3 = 0;
 paired_mom = 0;
@@ -449,8 +447,6 @@ mbase = KMSoptions.mbase;
 
 
 %% Re-centered Empirical Process
-% TODO- this has to be redone with candidate thetas
-%{
 % (See Pg 8, eq 2.6)
 % We compute the re-centered empirical process G.  This can be done
 % outside of the EAM loop in the separable case.  The bth recentered

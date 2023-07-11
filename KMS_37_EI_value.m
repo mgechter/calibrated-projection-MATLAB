@@ -46,10 +46,6 @@ component = KMSoptions.component;
 % Standardized momoments
 h_theta = sqrt(n)*(([m_ineq ; m_eq])./[m_ineq_std; m_eq_std]);
 
-% Drop moments close to boundary
-%f_keep = [f_ineq_keep;f_eq_keep];
-%h_theta(f_keep == 0,:) = [];
-
 % Step 2) c(theta) and s(theta)
 % Approximated value of c(theta) using DACE
 if BCS_EAM == 1

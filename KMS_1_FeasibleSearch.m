@@ -143,7 +143,6 @@ val_fminimax(ind,:) = [];
 [val_fminimax, sortind] = sort(val_fminimax,'ascend');
 theta_fminimax = theta_fminimax(sortind,:);
 num_fminimax = size(theta_fminimax,1);
-% CV_fminimax = zeros(num_fminimax,1);
 CV_maxviol = zeros(num_fminimax,1);
 if ~isempty(theta_fminimax)
     if parallel & BCS_EAM ~= 1

@@ -34,7 +34,6 @@ function [f_ineq,f_eq,f_ineq_keep,f_eq_keep,paired_mom,J1,J2,J3] = moments_w(W,K
 %               inequalities.  Thus, we have f_eq = [f(W) ; - f(W)], where
 %               f(W) is the vector of moment equalities.
 %
-%   TODO: come back to this
 %   f_ineq_keep,f_eq_keep      
 %               J1-by-1 and 2*J2-by-1 vector of moments to keep.  
 %               If empirical moment j is too close to the boundary of the 

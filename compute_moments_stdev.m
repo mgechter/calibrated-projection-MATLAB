@@ -41,11 +41,6 @@ function [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(th
     
     % separate x-specific parameters
     conditional_params = reshape(conditional_params, length(conditional_params)/n_x_supp, n_x_supp)';
-
-
-    
-    % previous code expects beta as the first element of theta.
-    % workaround by padding with zeros. TODO: subtract 1 from all indices
     conditional_params = [zeros(n_x_supp, 1) conditional_params];
     
     
@@ -109,7 +104,6 @@ function [m_ineq, m_eq, J1, J2, m_eq_std, m_ineq_std] = compute_moments_stdev(th
                             + (kron(y_cdf_dummies .* vado_t_for_dummies .* x_for_dummies, ones(1, n_supp)) .* ...
                                 repmat(scaled_1_minus_lambda(:)', n, 1) );
         gamma_mom_eq = mean(lambda_applied)' - gamma(:);
-        % semi-substantial errors above...
 
         % gamma moment inequalities
 

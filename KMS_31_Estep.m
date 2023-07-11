@@ -121,9 +121,6 @@ if parallel == 1 && BCS_EAM ~= 1
         % g(theta), Dg(theta) divided by the standard error.
        [Dg_ineq ,  Dg_eq] = moments_gradient(theta_test, J1, J2, y_supp, n_supp, n_x_supp, d, p_a, p_e, rho_l, KMSoptions);
         
-        % TODO: simple cases seem OK, not sure about the more complicated
-        % ones
-        
         % Gradients are normalized by the standard error
         Dg_ineq = Dg_ineq./repmat(m_ineq_std,[1, dim_p]);
         Dg_eq = Dg_eq./repmat(m_eq_std,[1, dim_p]);
@@ -180,16 +177,6 @@ if parallel == 1 && BCS_EAM ~= 1
         % 6) Constraint violation
         % Standardized moments
         m_theta = sqrt(n)*(([m_ineq; m_eq])./[m_ineq_std; m_eq_std]);
-
-% TODO: remove
-%         disp('constraint violation')
-%         disp(sqrt(n) * m_eq ./ m_eq_std);
-%         disp(c_Estep(ll,1));
-%         disp(sum(max(0,m_theta-c_Estep(ll,1)).^2))
-        
-        % Drop moments with value of f(W) close to boundary
-        %f_keep = [f_ineq_keep;f_eq_keep];
-        %m_theta(f_keep == 0,:) = [];
         
         CV_Estep(ll,1) = sum(max(0,m_theta-c_Estep(ll,1)).^2);
         
@@ -240,9 +227,6 @@ else
         % So the gradient of m(W,theta)/std(W) is equal to the gradient of
         % g(theta), Dg(theta) divided by the standard error.
         [Dg_ineq ,  Dg_eq] = moments_gradient(theta_test, J1, J2, y_supp, n_supp, n_x_supp, d, p_a, p_e, rho_l, KMSoptions);
-        
-        % TODO: simple cases seem OK, not sure about the more complicated
-        % ones
         
         % Gradients are normalized by the standard error
         Dg_ineq = Dg_ineq./repmat(m_ineq_std,[1, dim_p]);
@@ -300,14 +284,6 @@ else
         % 6) Constraint violation
         % Standardized moments
         m_theta = sqrt(n)*(([m_ineq; m_eq])./[m_ineq_std; m_eq_std]);
-        
-        %disp('constraint violation')
-        %disp(sqrt(n) * m_eq ./ m_eq_std);
-        %disp(c_Estep(ll,1));
-        
-        % Drop moments close to boundary
-        %f_keep = [f_ineq_keep;f_eq_keep];
-        %m_theta(f_keep == 0,:) = [];
         
         if BCS_EAM == 1
             % Constraint violation:

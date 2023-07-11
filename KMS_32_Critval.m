@@ -207,7 +207,6 @@ elseif strcmp(CI_method,'AS')
     m_eq_bs = zeros(2*KMSoptions.J2, B); 
     m_ineq_bs = zeros(KMSoptions.J1, B);
 
-    % I think this is typically already inside a parfor
     for b = 1:B
         classyearid = bs_classyears(:,b);
         d_b = innerjoin(table(classyearid), d);

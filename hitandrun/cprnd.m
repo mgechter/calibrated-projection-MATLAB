@@ -265,8 +265,6 @@ function [X S] = cprnd(N,A,b,options)
             tmin = max(c(z<0)); tmax = min(c(z>0));
             % Choose a random point on that line segment     
             
-            % TODO: u ends up as NaNs at times, could look into why
-            
             y = y + (tmin+(tmax-tmin)*rand)*u;
         end
         

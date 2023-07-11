@@ -54,10 +54,6 @@ DCeq = [];
 % Standardized momoments using empirical and theoretical moments:
 m_theta = sqrt(n)*(([m_ineq; m_eq])./[m_eq_std; m_ineq_std]);
 
-% Drop moments close to boundary
-%f_keep = [f_ineq_keep;f_eq_keep];
-%m_theta(f_keep == 0,:) = [];
-
 % Step 3) Compute standardized moments minus gamma
 m_theta = m_theta - gamma;
 
